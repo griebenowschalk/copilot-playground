@@ -1,0 +1,14 @@
+{
+  "inputs": [
+    { "type": "promptString", "id": "figma-key", "description": "Figma API Key", "password": true }
+  ],
+  "servers": {
+    "github": { "type": "http", "url": "https://api.githubcopilot.com/mcp/" },
+    "figma": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "figma-developer-mcp", "--stdio"],
+      "env": { "FIGMA_API_KEY": "${input:figma-key}" }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": ["Bash(npm *)", "Bash(git *)", "Read(*)", "Edit(*)"],
+    "deny": ["Bash(rm -rf *)", "Read(./.env)", "Read(./.env.*)"]
+  },
+  "hooks": {
+    "PostToolUse": [
+      { "matcher": "Edit|Write", "command": "npm run lint --silent || true" }
+    ]
+  }
+}
