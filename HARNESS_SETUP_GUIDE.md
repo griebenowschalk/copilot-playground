@@ -1,14 +1,42 @@
 # AI Harness Setup Guide
 
-A step-by-step guide for setting up a shared AI layer for GitHub Copilot and Claude Code in any codebase.
+A step-by-step guide for setting up a shared AI layer for GitHub Copilot and Claude Code in any codebase. Everything you need is in this file — work through it manually or use AI-DLC mode below.
 
-> **Reference examples:** See [`ai-harness-starter-kit/01-barebones/`](ai-harness-starter-kit/01-barebones/) for a minimal harness with every file trimmed to its essence. Start with [`LEARN.md`](ai-harness-starter-kit/01-barebones/LEARN.md) for an annotated walkthrough of the full structure.
+### How to follow this guide
+
+You can work through it in either mode — same steps, same outcome:
+
+| Mode | Who drives | Best for |
+|------|------------|----------|
+| **Manual** | You read each step and create/edit the files yourself | Learning the harness, small tweaks, full control |
+| **AI-DLC** | An AI facilitator runs the phases below; you answer policy questions and approve drafts | Rolling out the harness in a real repo with a senior or team lead in the loop |
+
+Manual: start at **Step 1: Initialize CLAUDE.md** below and proceed in order.
+
+AI-DLC: open this file in your agent (Cursor Plan/Agent mode, Claude Code, etc.), paste a prompt like the one below, and let the AI pause at each **AI-DLC checkpoint** for your input.
+
+**Example prompt:**
+
+```
+Implement the AI harness in this repo by following HARNESS_SETUP_GUIDE.md
+using the AI-DLC section at the top.
+
+Work one phase at a time. Pause at every AI-DLC checkpoint — ask me policy
+questions (non-negotiables, hooks, context doc domains) or offer to infer
+from the codebase and show a draft for approval. Do not skip phases or
+implement steps not yet documented in the guide.
+
+Start with Phase 0 kickoff, then Phase 1 (/init or equivalent for CLAUDE.md).
+Do not write AGENTS.md until CLAUDE.md is approved.
+```
 
 ---
 
 ## AI-DLC: Implement this harness
 
-This guide is an **implementation runbook**, not just reference material. When a senior or team lead asks an AI to roll out the harness, work **phase by phase** — the human provides policy, the AI structures the work, shows drafts, and writes only after approval.
+The section below is the **AI-DLC runbook** — operating rules for an AI facilitator. If you're following manually, skip ahead to **How the two files relate** below.
+
+When a senior or team lead uses AI-DLC mode, work **phase by phase** — the human provides policy, the AI structures the work, shows drafts, and writes only after approval.
 
 **Scope:** implement only the steps documented below. Stop at the end of Step 4 until this guide is extended.
 
@@ -110,7 +138,31 @@ This will:
 - Set up a rule routing table so Claude reads scoped instruction files on demand (the same `.github/instructions/*.instructions.md` files Copilot loads via `applyTo` globs)
 - Reference any skills, commands, subagents, hooks, and MCP servers you have configured
 
-If you're not in Claude Code, perform an equivalent single scan and generate `CLAUDE.md` using the structure in [`ai-harness-starter-kit/01-barebones/CLAUDE.md`](ai-harness-starter-kit/01-barebones/CLAUDE.md).
+If you're not in Claude Code, perform an equivalent single scan and generate `CLAUDE.md` at the repo root. At minimum it should include a routing table and pointers to harness paths:
+
+```markdown
+# Claude Code — Memory & Rule Router
+
+Read AGENTS.md first. Load detailed rules on demand via the routing table below.
+
+## Rule Routing Table (READ ON DEMAND)
+| If the task involves...          | Read this file                                |
+|----------------------------------|-----------------------------------------------|
+| React components / UI            | .github/instructions/frontend.instructions.md |
+| Schema, migrations, repositories | .github/instructions/database.instructions.md |
+| API route handlers               | .github/instructions/api.instructions.md      |
+| Writing or modifying tests       | .github/instructions/testing.instructions.md  |
+| Anything touching input/secrets  | .github/instructions/security.instructions.md |
+
+## Where the rest lives
+- Skills: `.claude/skills/<name>/SKILL.md`
+- Legacy commands: `.claude/commands/*.md`
+- Subagents: `.claude/agents/*.md`
+- Hooks + permissions: `.claude/settings.json`
+- MCP servers: `.mcp.json`
+```
+
+Adjust routing rows to match the instruction and context files you actually have.
 
 Review and customize the generated file — in particular, update the routing table to match the instruction files you actually have.
 
@@ -185,8 +237,6 @@ Create a `.claude/` directory at your repo root for Claude Code–specific confi
 | `.claude/commands/*.md` | Legacy slash commands (still work) |
 | `.claude/agents/*.md` | Subagents with their own prompt and tool restrictions |
 | `.claude/hooks/*` | Shell scripts invoked by hooks in `settings.json` |
-
-See [`ai-harness-starter-kit/01-barebones/.claude/`](ai-harness-starter-kit/01-barebones/.claude/) for a minimal working tree.
 
 ### 3.1 Hooks in `.claude/settings.json`
 

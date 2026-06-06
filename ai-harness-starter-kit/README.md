@@ -1,12 +1,13 @@
 # AI Harness Starter Kit — Copilot + Claude Code
 
-A two-level learning path for setting up a repo so **GitHub Copilot** and
+A three-level learning path for setting up a repo so **GitHub Copilot** and
 **Claude Code** share one set of rules, commands, skills, and MCP — the Cursor
 pattern, rebuilt portably.
 
 ```
-01-barebones/   ← the COMPLETE harness structure, no app. Learn what each piece is.
-02-full-demo/   ← the same harness on a runnable app, plus an interactive dashboard.
+01-barebones/     ← the COMPLETE harness structure, no app. Learn what each piece is.
+02-full-demo/     ← the same harness on a runnable app, plus an interactive dashboard.
+03-dummy-project/ ← harness-free app for testing HARNESS_SETUP_GUIDE.md AI-DLC.
 ```
 
 ## Level 1 — `01-barebones/`
@@ -31,11 +32,26 @@ Includes the working `/figma` skill (with its script), seeded data, and an
 interactive demo dashboard at `02-full-demo/docs/harness-explorer.html`
 (open in a browser, no setup). See its `README.md` and `DEMO.md`.
 
+## Level 3 — `03-dummy-project/`
+A **harness-free** mini tasks app (same stack as `02-full-demo`) for repeatedly
+testing [HARNESS_SETUP_GUIDE.md](../HARNESS_SETUP_GUIDE.md) in AI-DLC mode. Open
+**copilot-playground** as workspace, run the scoped AI-DLC prompt from
+`03-dummy-project/README.md`, then reset with:
+
+```bash
+cd 03-dummy-project
+./scripts/reset-harness.sh   # strips full LEARN.md harness tree; restores bare app
+```
+
+Use this when you want to practice rolling out the harness from scratch without
+copying `01-barebones/` or `02-full-demo/` first.
+
 ## Suggested path
 1. Read `01-barebones/LEARN.md` end to end (5 min) — you now know the structure.
 2. Skim each file in `01-barebones/`; the top-line note tells you its job.
 3. Move to `02-full-demo/`, run it, and use `harness-explorer.html` + `DEMO.md`
    to demo it to your team lead.
+4. Use `03-dummy-project/` to test the setup guide's AI-DLC flow, reset, repeat.
 
 ## How to use a level
 Each level is self-contained. Either **open that one folder as your VS Code /
