@@ -29,6 +29,10 @@ remove .claude
 # docs/ — context docs, harness-explorer, ARCHITECTURE.md
 remove docs
 
+# Graphify — knowledge graph output and ignore file
+remove graphify-out
+remove .graphifyignore
+
 # Restore app files harness may have modified (e.g. FIGMA_API_KEY in .env.example)
 if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   git checkout -- .env.example .gitignore 2>/dev/null || true

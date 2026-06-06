@@ -14,5 +14,8 @@ automatically based on the file you are editing (each file's `applyTo` glob).
 - All input validated with Zod; errors typed (no `catch (e: any)`).
 - Mirror the linter; never produce code that fails `pnpm lint`.
 
-Reusable workflows live in `.github/prompts/` (e.g. `/review`, `/figma`).
+Reusable workflows live in `.github/prompts/` (e.g. `/review`, `/figma`, `/graphify`).
 MCP servers (incl. Figma) are configured in `.vscode/mcp.json`.
+
+For architecture or flow questions, use `/graphify` or read `graphify-out/GRAPH_REPORT.md`
+before grepping multiple files.

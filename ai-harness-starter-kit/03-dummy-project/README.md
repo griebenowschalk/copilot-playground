@@ -27,8 +27,10 @@ by following HARNESS_SETUP_GUIDE.md using the AI-DLC section.
 
 All harness files must live under 03-dummy-project/, not the monorepo root.
 Work one phase at a time. Pause at every AI-DLC checkpoint.
-Start with Phase 0 kickoff. Do not write AGENTS.md until CLAUDE.md is approved.
-Stop at end of Step 4.
+Start with Phase 0 kickoff. At Phase 0.5, ask whether to enable Graphify — if yes,
+run Step 0.5.0 check-and-install (preflight, install if missing, re-verify); only
+skip Graphify if install fails or I decline. Do not write AGENTS.md until CLAUDE.md
+is approved. Stop at end of Step 4.
 ```
 
 3. Work through checkpoints; approve drafts before the agent writes files.
@@ -59,6 +61,14 @@ Then re-run the AI-DLC prompt above.
 - `AGENTS.md` — stack, commands, non-negotiables
 - `.claude/settings.json` — hooks + permissions (optional `hooks/*.sh`)
 - `docs/context/*.md` — domain context docs + index
+
+**If Graphify was enabled at Phase 0.5**, also expect:
+
+- `.graphifyignore` + `graphify-out/` — codebase graph (output gitignored)
+- `.claude/skills/graphify/SKILL.md` — Claude `/graphify` skill
+- `.github/prompts/graphify.prompt.md` — Copilot `/graphify` prompt
+- Graphify section in `AGENTS.md` + architecture row in `CLAUDE.md`
+- PreToolUse hook from Graphify merged into `.claude/settings.json`
 
 **After full harness (guide extensions + manual steps):**
 

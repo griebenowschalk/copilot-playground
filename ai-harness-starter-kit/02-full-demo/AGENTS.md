@@ -29,3 +29,8 @@ UI (components/pages) → services → repositories (`src/db/repos`) → Prisma
 - All external input validated with Zod (`src/lib/validation.ts`).
 - Soft-delete with `deletedAt`; never hard-delete.
 - Mirror the linter — never generate code that fails `pnpm lint`.
+
+## Code graph (Graphify)
+For architecture or cross-file questions, read `graphify-out/GRAPH_REPORT.md` or run
+`graphify query "..."` before opening multiple source files. Rebuild after structural
+changes: `graphify update .`. Copilot: type `/graphify` in chat.

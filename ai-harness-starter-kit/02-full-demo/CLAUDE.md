@@ -12,6 +12,7 @@ one source of truth.
 
 | If the task involves...                        | Read this file                                  |
 |------------------------------------------------|-------------------------------------------------|
+| Architecture, codebase structure, onboarding   | graphify-out/GRAPH_REPORT.md or `/graphify query` |
 | React components, UI, client interactivity     | .github/instructions/frontend.instructions.md   |
 | Prisma schema, migrations, repositories        | .github/instructions/database.instructions.md   |
 | API route handlers under src/app/api           | .github/instructions/api.instructions.md        |
@@ -22,8 +23,9 @@ Rules of thumb: read every relevant file when a task spans areas; security
 applies to everything; after reading a rule file, follow it as if it were here.
 
 ## Skills & commands
+- Code graph: build with `/graphify .` or `graphify extract .`; query before grepping source.
 - Skills live in `.claude/skills/<name>/SKILL.md` and can bundle scripts.
-  Available: `/figma`, `/review`, `/scaffold-component`.
+  Available: `/graphify`, `/figma`, `/review`, `/scaffold-component`.
 - Legacy commands in `.claude/commands/` still work (e.g. `/ship`).
 
 ## Subagents (`.claude/agents/`)

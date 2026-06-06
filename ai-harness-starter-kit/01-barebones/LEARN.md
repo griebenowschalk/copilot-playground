@@ -18,8 +18,10 @@ intent-based loading is the thing Copilot can't do alone.
 ```
 AGENTS.md                         shared baseline — BOTH tools, every request. Keep short.
 CLAUDE.md                         Claude memory + the on-demand ROUTING TABLE.
+.graphifyignore                   excludes build artifacts + docs from the code graph.
 .mcp.json                         Claude's MCP servers (GitHub, Figma). Key from env.
 .env.example                      template for secrets (FIGMA_API_KEY). Copy to .env.
+graphify-out/                     generated knowledge graph (gitignored; rebuild locally).
 
 .github/
   copilot-instructions.md         Copilot baseline — every request. Keep short.
@@ -30,6 +32,7 @@ CLAUDE.md                         Claude memory + the on-demand ROUTING TABLE.
     api.instructions.md             applyTo src/app/api/**
     testing.instructions.md         applyTo **/*.test.*
   prompts/                        Copilot manual commands (type /name in chat)
+    graphify.prompt.md              /graphify — query codebase graph
     review.prompt.md                /review
     scaffold-component.prompt.md    /scaffold-component
     figma.prompt.md                 /figma  (uses Figma MCP)
@@ -45,6 +48,7 @@ CLAUDE.md                         Claude memory + the on-demand ROUTING TABLE.
   settings.local.json             personal overrides (gitignored)
   commands/ship.md                legacy command (still works) — /ship
   skills/                         skills = richer commands (can bundle scripts)
+    graphify/SKILL.md               /graphify — codebase knowledge graph
     figma/SKILL.md                  /figma
     figma/scripts/fetch-context.sh  ← script the skill runs; reads FIGMA_API_KEY
     review/SKILL.md                 /review  (mirrors the Copilot prompt)
@@ -59,13 +63,23 @@ CLAUDE.md                         Claude memory + the on-demand ROUTING TABLE.
 - "Claude only": `CLAUDE.md`, everything under `.claude/`, `.mcp.json`.
 - "Copilot only": `.github/copilot-instructions.md`, `.github/prompts/*`, `.vscode/*`.
 
-## The four loading modes (Cursor parity)
+## The five loading modes (Cursor parity)
 | Mode | Claude | Copilot |
 |---|---|---|
-| Always-on | AGENTS.md + CLAUDE.md | copilot-instructions.md + AGENTS.md |
+| Always-on | AGENTS.md + CLAUDE.md + PreToolUse graph hook | copilot-instructions.md + AGENTS.md |
+| Code discovery | `/graphify query` + GRAPH_REPORT.md | `/graphify` prompt + GRAPH_REPORT.md + `graphify query` |
 | By file path (glob) | router can use it | instructions/* applyTo |
 | By task intent | CLAUDE.md routing table | — (Copilot can't) |
 | Manual command | skills/ + commands/ | prompts/ |
+
+Graphify sits between routing/context docs and raw file reads: query the graph
+first (~30–150 tokens), read source files only when the graph lacks detail.
+
+**At harness setup**, Graphify is optional — Phase 0.5 asks whether to enable it.
+Requires **Python 3.10+**; if the machine only has 3.9.x (common on macOS), skip
+Graphify or upgrade Python first — the harness continues with `/init` either way.
+The files below are in this template for teams that opt in; skip them if you use
+classic `/init` discovery instead.
 
 ## Secrets: where API keys live
 NOT in commands/skills. In the MCP layer: `${FIGMA_API_KEY}` from env (Claude)
@@ -76,6 +90,10 @@ the same `/figma` works in both because auth isn't baked into the command.
 To add a rule area: add `.github/instructions/<area>.instructions.md` with an
 `applyTo`, and add one row to the `CLAUDE.md` routing table. One edit → both
 tools updated. No duplication, ever.
+
+To add a Graphify workflow for Copilot: add `.github/prompts/graphify.prompt.md`
+(already in this template). Claude uses `.claude/skills/graphify/SKILL.md`.
+Both query the same `graphify-out/` graph.
 
 ## Next: ../02-full-demo
 Same structure, plus a runnable app the rules govern and an interactive

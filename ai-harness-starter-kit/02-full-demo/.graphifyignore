@@ -1,0 +1,10 @@
+node_modules/
+.next/
+out/
+*.db
+src/generated/
+graphify-out/
+
+# Docs — Graphify LLM-extracts .md by default; exclude for code-only (offline AST) graphs
+README.md
+docs/

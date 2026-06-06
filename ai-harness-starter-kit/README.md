@@ -65,3 +65,10 @@ Put scoped rules in `.github/instructions/*.instructions.md` once; Copilot reads
 them by `applyTo` glob, Claude reads them on demand via the `CLAUDE.md` routing
 table — single source of truth, plus Cursor-style intent-based loading that
 Copilot can't do alone.
+
+## Graphify — optional code discovery layer
+Graphify is **optional** at harness setup (Phase 0.5 asks yes/no; requires Python
+3.10+ — skip if unavailable). When enabled, both tools share one codebase graph (`graphify-out/`): Claude uses `/graphify query`
+and a PreToolUse hook; Copilot uses the `/graphify` prompt. The `01-barebones/` and
+`02-full-demo/` templates include Graphify files for reference; skip them if you
+decline at Phase 0.5. Daily usage: [GRAPHIFY_GUIDE.md](../GRAPHIFY_GUIDE.md).

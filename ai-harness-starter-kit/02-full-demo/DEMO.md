@@ -59,6 +59,27 @@ run a setup script itself — auth lives in `.vscode/mcp.json` instead.
 
 ---
 
+## 4b. Graphify — query instead of paste (≈2 min)
+Build the graph once: `graphify extract .` (from the project root).
+
+**Claude Code:**
+```
+/graphify query "how do tasks flow from the API route to the database?"
+```
+
+**Copilot Chat:** type `/graphify`, then ask the same question. Copilot reads
+`GRAPH_REPORT.md` and runs `graphify query` via terminal instead of opening four files.
+
+Both get the layer chain (route → service → repo → Prisma) from the graph —
+~80 tokens — instead of pasting or reading ~600+ tokens of source.
+
+Compare: ask the same question **without** Graphify and watch multiple files get read.
+
+Rebuild after structural changes: `graphify update .`. Daily reference:
+[`GRAPHIFY_GUIDE.md`](../../GRAPHIFY_GUIDE.md).
+
+---
+
 ## 5. Guardrails
 Open `.claude/settings.json` (permissions deny reading `.env`, deny `rm -rf`)
 and `security.instructions.md` (`applyTo: "**"` — loads everywhere).

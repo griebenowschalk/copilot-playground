@@ -12,3 +12,8 @@ Replace the placeholders below with your real project.
 
 ## Non-negotiables
 - Named exports only. Validate all input. Mirror the linter.
+
+## Code graph (Graphify)
+For architecture or cross-file questions, read `graphify-out/GRAPH_REPORT.md` or run
+`graphify query "..."` before opening multiple source files. Rebuild after structural
+changes: `graphify update .`. Copilot: type `/graphify` in chat.
