@@ -31,7 +31,7 @@ or implement steps not yet documented.
 
 Start with Phase 0 kickoff. At Phase 0.5, ask whether to enable Graphify — if yes,
 follow step-0.5-graphify.md; only skip if install fails or I decline.
-Stop at step-5-mcp.md. Do not write AGENTS.md until CLAUDE.md is approved.
+Stop at step-6-skills.md. Do not write AGENTS.md until CLAUDE.md is approved.
 ```
 
 ---
@@ -40,7 +40,7 @@ Stop at step-5-mcp.md. Do not write AGENTS.md until CLAUDE.md is approved.
 
 When a senior or team lead uses AI-DLC mode, work **phase by phase** — the human provides policy, the AI structures the work, shows drafts, and writes only after approval.
 
-**Scope:** implement only steps documented in this folder. Stop at Step 5 until new step files are added.
+**Scope:** implement only steps documented in this folder. Stop at Step 6 until new step files are added.
 
 ### Roles
 
@@ -58,7 +58,7 @@ When a senior or team lead uses AI-DLC mode, work **phase by phase** — the hum
 5. **Ask on policy**; **infer on facts** already captured in Phase 1.
 6. **Escape hatch** at every policy checkpoint: *"Specify now, or I'll infer and show a draft to approve."*
 7. **Never copy guide examples verbatim** unless they match this project — including non-negotiables: use the stack, tools, and patterns Phase 1 actually found.
-8. **Stop** at the last documented step — do not implement skills or scoped instructions until a new `step-*.md` exists in this folder.
+8. **Stop** at the last documented step — do not implement scoped instructions or Copilot skill parity until a new `step-*.md` exists in this folder.
 9. **Graphify is optional and non-blocking** — see `step-0.5-graphify.md`. Never halt the harness waiting on Graphify.
 
 ### Phase flow
@@ -72,6 +72,7 @@ When a senior or team lead uses AI-DLC mode, work **phase by phase** — the hum
 | 3 — Guardrails | `step-3-claude-folder.md` | Reuse Phase 1 | **Yes — hooks, permissions & subagents** |
 | 4 — Context docs | `step-4-context-docs.md` | Targeted reads only | **Yes — which domains** |
 | 5 — MCP | `step-5-mcp.md` | No | **Yes — Figma for frontend?** |
+| 6 — Skills | `step-6-skills.md` | Reuse Phase 1 | **Yes — staple + codebase-specific list** |
 
 **Phase 0 — Kickoff:** Confirm workspace root. Open with: *"At Phase 0.5 I'll ask whether you want Graphify. Either way, we do one discovery pass — graph or `/init` — then reuse it for the rest."*
 
@@ -87,6 +88,8 @@ When a senior or team lead uses AI-DLC mode, work **phase by phase** — the hum
 
 **Phase 5:** Follow `step-5-mcp.md`. Gate: approve `.mcp.json` + optional Figma; verify with `/mcp`.
 
+**Phase 6:** Follow `step-6-skills.md`. Propose staple skills (security, primary-language conventions, testing) plus codebase-specific skills inferred from Phase 1 discovery. Gate: approve the skill list and sample `SKILL.md` drafts before writing.
+
 ### Checkpoint quick-reference
 
 | Checkpoint | Step file | Ask human | Infer if deferred |
@@ -98,6 +101,7 @@ When a senior or team lead uses AI-DLC mode, work **phase by phase** — the hum
 | Subagents | `step-3-claude-folder.md` §3.3 | Which subagents to add | Install `docs-explorer` only |
 | Context docs | `step-4-context-docs.md` | Which domains | Doc list from tree or graph |
 | MCP | `step-5-mcp.md` | Figma for frontend? yes/no | Baseline only (filesystem, memory, git, context7) |
+| Skills | `step-6-skills.md` | Which staple + codebase-specific skills | Staples (§6.2) + one skill per major framework/runtime found |
 
 ### Extension pattern
 
@@ -135,5 +139,6 @@ Step file template:
 | `agents/docs-explorer.md` | Copyable subagent template referenced from §3.3 |
 | `step-4-context-docs.md` | `docs/context/` reference docs |
 | `step-5-mcp.md` | MCP servers (`.mcp.json`) |
+| `step-6-skills.md` | Project skills (`.claude/skills/<name>/SKILL.md`) |
 
 More steps will be added as new files in this folder using the extension pattern above.

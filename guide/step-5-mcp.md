@@ -198,4 +198,4 @@ CLI alternatives: `claude mcp list` and `claude mcp status <name>`.
 > Show draft `.mcp.json`, `.env.example` (if Figma), gitignore additions, and `CLAUDE.md` MCP section for approval.
 > After write: verify with `/mcp`. Do not hardcode API keys.
 
-**End of documented steps.** Future steps (skills, scoped instructions, Copilot MCP parity) will be added as new files in this folder — see `HARNESS_SETUP_GUIDE.md` extension pattern.
+**Next:** `step-6-skills.md`
