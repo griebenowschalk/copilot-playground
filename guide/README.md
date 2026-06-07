@@ -11,8 +11,10 @@ All harness rollout documentation lives in this folder. Copy the whole **`guide/
 | `step-0.5-graphify.md` | Optional Graphify harness integration |
 | `step-1-claude.md` | Initialize `CLAUDE.md` |
 | `step-2-agents.md` | Set up `AGENTS.md` |
-| `step-3-claude-folder.md` | `.claude/` hooks and permissions |
+| `step-3-claude-folder.md` | `.claude/` hooks, permissions, and subagents (§3.3) |
+| `agents/docs-explorer.md` | Copyable subagent template referenced from §3.3 — install in `.claude/agents/` |
 | `step-4-context-docs.md` | `docs/context/` reference docs |
+| `step-5-mcp.md` | MCP servers (`.mcp.json`) |
 
 ## Step order
 
@@ -22,7 +24,8 @@ All harness rollout documentation lives in this folder. Copy the whole **`guide/
 | 0.5 *(optional)* | Graph | `step-0.5-graphify.md` | `.graphifyignore`, graph outputs, Graphify harness files |
 | 1 | Init | `step-1-claude.md` | `CLAUDE.md` |
 | 2 | Baseline | `step-2-agents.md` | `AGENTS.md` |
-| 3 | Guardrails | `step-3-claude-folder.md` | `.claude/settings.json`, hook scripts |
+| 3 | Guardrails | `step-3-claude-folder.md` | `.claude/settings.json`, hook scripts, `.claude/agents/*.md` |
 | 4 | Context | `step-4-context-docs.md` | `docs/context/*.md`, routing rows |
+| 5 | MCP | `step-5-mcp.md` | `.mcp.json`, `.env.example` (if Figma), `CLAUDE.md` MCP section |
 
 **AI-DLC:** load `HARNESS_SETUP_GUIDE.md` plus **only the current step file** for the active phase.

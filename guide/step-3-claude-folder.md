@@ -1,6 +1,6 @@
 # Step 3: Set up the `.claude` folder
 
-**Phase 3 · AI-DLC checkpoint in §3.1**
+**Phase 3 · AI-DLC checkpoints in §3.1 (hooks) and §3.3 (subagents)**
 
 Create a `.claude/` directory at your repo root for Claude Code–specific configuration. Commit `.claude/settings.json` so the team shares the same guardrails; keep personal overrides in `.claude/settings.local.json` (gitignored).
 
@@ -122,5 +122,64 @@ Step 0.5 runs `graphify claude install --project`, which adds a **PreToolUse** h
 **Order:** Graphify install in Phase 0.5 first; write harness hooks in Phase 3 after, preserving PreToolUse.
 
 Copilot has no PreToolUse hook — it uses the Graphify section in `AGENTS.md`, `copilot-instructions.md`, and the `/graphify` prompt instead.
+
+---
+
+## 3.3 Subagents (`.claude/agents/`)
+
+Subagents are specialist Claude instances defined in `.claude/agents/<name>.md`. Each runs in its own context window with its own system prompt, tool restrictions, and (optionally) model — keeping noisy or narrow work (doc lookups, test triage, code review) out of the main session's context.
+
+### Anatomy of a subagent file
+
+```markdown
+---
+name: kebab-case-name
+description: One line — what it does AND when to use it. This is what Claude
+  matches against to decide whether to delegate automatically.
+tools: Tool, Another, mcp__server__tool
+model: sonnet
+---
+System prompt: role, workflow, output format, and any hard "do not" rules
+(e.g. "read-only — do not edit files").
+```
+
+| Field | Notes |
+|-------|-------|
+| `name` | kebab-case, matches the filename (e.g. `code-reviewer.md` → `name: code-reviewer`) |
+| `description` | The single biggest lever for auto-routing — be specific about *when* to use it, not just *what* it does |
+| `tools` | Restrict to the minimum the role needs (e.g. read-only review agents get `Read, Grep, Glob`, not `Edit`/`Bash`) |
+| `model` | Optional override — pick a smaller/faster model for narrow, high-volume tasks |
+
+### What makes a good subagent
+
+| Principle | Why it matters |
+|-----------|----------------|
+| **Narrow and named for the job** | "code-reviewer", not "helper" — the description is a routing key, not a label |
+| **Tool allowlist matches the role** | A reviewer that can't `Edit` can't accidentally rewrite the thing it's grading |
+| **Self-contained system prompt** | The subagent starts cold with no conversation history — spell out workflow and output format |
+| **Parallel-friendly** | Good candidates are tasks you'd otherwise run sequentially and discard the noise from (doc lookups, multi-file searches, test triage) |
+
+### Default: `docs-explorer`
+
+If the human doesn't name specific subagents to add, install **`docs-explorer`** — a documentation lookup specialist that fetches up-to-date library/framework docs (via the `context7` MCP server from Step 5, with web search as fallback) instead of guessing from training data.
+
+A ready-to-copy template lives at [`agents/docs-explorer.md`](agents/docs-explorer.md) in this guide folder. Copy it to `.claude/agents/docs-explorer.md` — it uses `Skill`/`MCPSearch` so it resolves whichever MCP doc servers (e.g. `context7` from Step 5) are actually connected, rather than hardcoding tool names.
+
+Add or extend the **Subagents** section in `CLAUDE.md` so Claude knows what's available without scanning the directory — and pair the entry with a hard rule that sends Claude to it, the same way Step 5 pairs MCP servers with "when to reach for" guidance:
+
+```markdown
+## Subagents (`.claude/agents/`)
+- `docs-explorer` — fetches current library/framework docs via context7 + web search.
+
+Whenever working with any third-party library or framework, you MUST look up
+the official documentation for the version in use to ensure you're working with
+up-to-date and correct information — use the `docs-explorer` subagent for
+efficient, parallel documentation lookup rather than guessing from training data.
+```
+
+This pairing matters more than the subagent file itself: a `docs-explorer` agent that exists but is never invoked is dead weight. The rule is what makes Claude reach for it on every "how does `<library>` do X" task instead of guessing.
+
+> **AI-DLC checkpoint — Phase 3 (subagents)**
+> Stop. Ask: **which subagents should this repo have?** Offer any existing `.claude/agents/*.md` files as a baseline, and propose `docs-explorer` as the default if the human has no other candidates in mind. If the human defers, install `docs-explorer` only. Show the draft agent file(s) and `CLAUDE.md` Subagents section for approval before writing.
 
 **Next:** `step-4-context-docs.md`

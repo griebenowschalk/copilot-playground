@@ -125,4 +125,4 @@ Do **not** copy context docs into `AGENTS.md` — too long for every request.
 
 **Optional — enforce rules on edits:** create `.github/instructions/context-docs.instructions.md` with `applyTo: "docs/context/**"` mirroring the documentation rules above, so Copilot follows the same constraints when editing context files.
 
-**End of documented steps.** Future steps will be added as new files in this folder — see `HARNESS_SETUP_GUIDE.md` extension pattern.
+**Next:** `step-5-mcp.md`

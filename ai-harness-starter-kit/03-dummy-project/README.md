@@ -30,7 +30,7 @@ Load the hub for AI-DLC rules; load only the step file for the current phase
 (see guide/README.md). Work one phase at a time. Pause at every AI-DLC checkpoint.
 Start with Phase 0 kickoff. At Phase 0.5, ask whether to enable Graphify — if yes,
 follow guide/step-0.5-graphify.md; only skip if install fails or I decline.
-Do not write AGENTS.md until CLAUDE.md is approved. Stop at guide/step-4-context-docs.md.
+Do not write AGENTS.md until CLAUDE.md is approved. Stop at guide/step-5-mcp.md.
 ```
 
 3. Work through checkpoints; approve drafts before the agent writes files.
@@ -44,9 +44,10 @@ After a partial or **full** harness build:
 ```
 
 This removes everything in the [01-barebones/LEARN.md](../01-barebones/LEARN.md) file map
-(`AGENTS.md`, `CLAUDE.md`, `.mcp.json`, `.github/`, `.vscode/`, `.claude/`, `docs/`, etc.)
+(`AGENTS.md`, `CLAUDE.md`, `.mcp.json`, `.github/`, `.vscode/`, `.claude/`, `docs/`, etc.),
+plus Step 5 MCP artifacts (`.env` with optional `FIGMA_API_KEY`, `.claude/memory.jsonl`),
 and restores `.env.example` / `.gitignore` from git if the harness modified them.
-App code under `src/` and `prisma/` is untouched.
+App code under `src/` and `prisma/` is untouched — run `pnpm setup` if `.env` was removed.
 
 Those same paths are listed in `.gitignore`, so harness output from AI-DLC testing
 never enters version control — only reset (or delete locally) is needed between runs.
@@ -55,12 +56,14 @@ Then re-run the AI-DLC prompt above.
 
 ## Expected end state
 
-**After AI-DLC Phases 0–4 (current guide scope):**
+**After AI-DLC Phases 0–5 (current guide scope):**
 
-- `CLAUDE.md` — router + routing table
+- `CLAUDE.md` — router + routing table + MCP section
 - `AGENTS.md` — stack, commands, non-negotiables
 - `.claude/settings.json` — hooks + permissions (optional `hooks/*.sh`)
 - `docs/context/*.md` — domain context docs + index
+- `.mcp.json` — filesystem, memory, git, context7 MCP servers (+ optional Figma)
+- `.env.example` — app vars; adds `FIGMA_API_KEY` if Figma MCP was opted in
 
 **If Graphify was enabled at Phase 0.5**, also expect:
 
@@ -77,7 +80,6 @@ Compare against the annotated map in [01-barebones/LEARN.md](../01-barebones/LEA
 - `.github/instructions/*.instructions.md` + `prompts/`
 - `.vscode/` — Copilot MCP + settings
 - `.claude/skills/`, `commands/`, `agents/`
-- `.mcp.json`
 
 ## Architecture (for context-doc discovery)
 

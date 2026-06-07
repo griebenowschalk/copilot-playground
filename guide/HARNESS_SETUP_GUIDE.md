@@ -13,7 +13,7 @@ A step-by-step guide for setting up a shared AI layer for GitHub Copilot and Cla
 | **Manual** | You read each step file and create/edit files yourself | Learning the harness, small tweaks, full control |
 | **AI-DLC** | An AI facilitator runs the phases; you answer policy questions and approve drafts | Rolling out the harness with a senior or team lead in the loop |
 
-**Manual:** read `00-how-files-relate.md`, then `step-1-claude.md` through `step-4-context-docs.md`. Optionally run `step-0.5-graphify.md` first.
+**Manual:** read `00-how-files-relate.md`, then `step-1-claude.md` through `step-5-mcp.md`. Optionally run `step-0.5-graphify.md` first.
 
 **AI-DLC:** open this hub plus the **current phase step file** in your agent. Pause at every **AI-DLC checkpoint** in that step file.
 
@@ -31,7 +31,7 @@ or implement steps not yet documented.
 
 Start with Phase 0 kickoff. At Phase 0.5, ask whether to enable Graphify — if yes,
 follow step-0.5-graphify.md; only skip if install fails or I decline.
-Stop at step-4-context-docs.md. Do not write AGENTS.md until CLAUDE.md is approved.
+Stop at step-5-mcp.md. Do not write AGENTS.md until CLAUDE.md is approved.
 ```
 
 ---
@@ -40,7 +40,7 @@ Stop at step-4-context-docs.md. Do not write AGENTS.md until CLAUDE.md is approv
 
 When a senior or team lead uses AI-DLC mode, work **phase by phase** — the human provides policy, the AI structures the work, shows drafts, and writes only after approval.
 
-**Scope:** implement only steps documented in this folder. Stop at Step 4 until new step files are added.
+**Scope:** implement only steps documented in this folder. Stop at Step 5 until new step files are added.
 
 ### Roles
 
@@ -58,7 +58,7 @@ When a senior or team lead uses AI-DLC mode, work **phase by phase** — the hum
 5. **Ask on policy**; **infer on facts** already captured in Phase 1.
 6. **Escape hatch** at every policy checkpoint: *"Specify now, or I'll infer and show a draft to approve."*
 7. **Never copy guide examples verbatim** unless they match this project — including non-negotiables: use the stack, tools, and patterns Phase 1 actually found.
-8. **Stop** at the last documented step — do not implement skills, MCP, or scoped instructions until a new `step-*.md` exists in this folder.
+8. **Stop** at the last documented step — do not implement skills or scoped instructions until a new `step-*.md` exists in this folder.
 9. **Graphify is optional and non-blocking** — see `step-0.5-graphify.md`. Never halt the harness waiting on Graphify.
 
 ### Phase flow
@@ -69,8 +69,9 @@ When a senior or team lead uses AI-DLC mode, work **phase by phase** — the hum
 | 0.5 — Graph *(optional)* | `step-0.5-graphify.md` | **Yes — if opted in** | **Ask: enable Graphify?** |
 | 1 — Init | `step-1-claude.md` | Reuse Phase 0.5 or `/init` | Light — routing rows |
 | 2 — Baseline | `step-2-agents.md` | Reuse Phase 1 | **Yes — non-negotiables** |
-| 3 — Guardrails | `step-3-claude-folder.md` | Reuse Phase 1 | **Yes — hooks & permissions** |
+| 3 — Guardrails | `step-3-claude-folder.md` | Reuse Phase 1 | **Yes — hooks, permissions & subagents** |
 | 4 — Context docs | `step-4-context-docs.md` | Targeted reads only | **Yes — which domains** |
+| 5 — MCP | `step-5-mcp.md` | No | **Yes — Figma for frontend?** |
 
 **Phase 0 — Kickoff:** Confirm workspace root. Open with: *"At Phase 0.5 I'll ask whether you want Graphify. Either way, we do one discovery pass — graph or `/init` — then reuse it for the rest."*
 
@@ -80,9 +81,11 @@ When a senior or team lead uses AI-DLC mode, work **phase by phase** — the hum
 
 **Phase 2:** Follow `step-2-agents.md`. Propose only non-negotiables evidenced in discovery. Gate: approve `AGENTS.md` before Step 3.
 
-**Phase 3:** Follow `step-3-claude-folder.md`. Merge Graphify PreToolUse if Step 0.5 ran (§3.2).
+**Phase 3:** Follow `step-3-claude-folder.md`. Merge Graphify PreToolUse if Step 0.5 ran (§3.2). Set up subagents (§3.3) — default to `docs-explorer` (template at `agents/docs-explorer.md`) if the human names nothing else.
 
 **Phase 4:** Follow `step-4-context-docs.md`. Gate: approve doc list + sample; update `CLAUDE.md` routing.
+
+**Phase 5:** Follow `step-5-mcp.md`. Gate: approve `.mcp.json` + optional Figma; verify with `/mcp`.
 
 ### Checkpoint quick-reference
 
@@ -92,7 +95,9 @@ When a senior or team lead uses AI-DLC mode, work **phase by phase** — the hum
 | `CLAUDE.md` | `step-1-claude.md` | Routing rows | Agent-generate from discovery |
 | Non-negotiables | `step-2-agents.md` | 3–6 universal rules | Propose from conventions; skip inapplicable categories |
 | Hooks | `step-3-claude-folder.md` | PostToolUse / Stop / denies | Minimal lint + default denies |
+| Subagents | `step-3-claude-folder.md` §3.3 | Which subagents to add | Install `docs-explorer` only |
 | Context docs | `step-4-context-docs.md` | Which domains | Doc list from tree or graph |
+| MCP | `step-5-mcp.md` | Figma for frontend? yes/no | Baseline only (filesystem, memory, git, context7) |
 
 ### Extension pattern
 
@@ -126,7 +131,9 @@ Step file template:
 | `step-0.5-graphify.md` | Optional codebase graph (harness integration) |
 | `step-1-claude.md` | Initialize `CLAUDE.md` |
 | `step-2-agents.md` | Set up `AGENTS.md` |
-| `step-3-claude-folder.md` | `.claude/` hooks and permissions |
+| `step-3-claude-folder.md` | `.claude/` hooks, permissions, and subagents (§3.3) |
+| `agents/docs-explorer.md` | Copyable subagent template referenced from §3.3 |
 | `step-4-context-docs.md` | `docs/context/` reference docs |
+| `step-5-mcp.md` | MCP servers (`.mcp.json`) |
 
 More steps will be added as new files in this folder using the extension pattern above.
