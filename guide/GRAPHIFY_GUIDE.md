@@ -2,8 +2,7 @@
 
 Short guide for using Graphify with the AI harness in this repo. Graphify is
 **optional** during harness setup — Phase 0.5 asks whether you want it. If you
-skipped it, you can add Graphify later using Step 0.5 in
-[HARNESS_SETUP_GUIDE.md](HARNESS_SETUP_GUIDE.md).
+skipped it, you can add Graphify later using [`step-0.5-graphify.md`](step-0.5-graphify.md).
 
 ## What it is
 
@@ -34,7 +33,7 @@ lacks detail.
 python3 --version    # must be 3.10.0 or higher — not macOS system 3.9.x
 ```
 
-If below 3.10, install a newer Python before Graphify (see below). **If you cannot upgrade, skip Graphify** — the harness works without it ([HARNESS_SETUP_GUIDE.md](HARNESS_SETUP_GUIDE.md) Phase 0.5).
+If below 3.10, install a newer Python before Graphify (see below). **If you cannot upgrade, skip Graphify** — the harness works without it ([`step-0.5-graphify.md`](step-0.5-graphify.md)).
 
 ```bash
 uv tool install graphifyy   # recommended — PyPI: graphifyy (double-y); CLI: graphify
@@ -55,7 +54,7 @@ graphify --version
 
 Or: `brew install python@3.12 pipx && pipx install graphifyy`, or install from [python.org/downloads/macos](https://www.python.org/downloads/macos/).
 
-First project setup: opt in at [HARNESS_SETUP_GUIDE.md](HARNESS_SETUP_GUIDE.md) Phase 0.5 — Step 0.5.0 runs check-and-install automatically when selected.
+First project setup: opt in at Phase 0.5 — follow [`step-0.5-graphify.md`](step-0.5-graphify.md) (Step 0.5.0 runs check-and-install when selected).
 
 ### Harness setup: check and install
 
@@ -69,9 +68,9 @@ Skip only if install fails or you decline — harness continues with `/init`.
 
 ### Adding Graphify after harness setup
 
-If you skipped Graphify during rollout, run Step 0.5 from the harness guide anytime —
+If you skipped Graphify during rollout, run [`step-0.5-graphify.md`](step-0.5-graphify.md) anytime —
 then add the Graphify section to `AGENTS.md`, the routing row to `CLAUDE.md`, and
-merge the PreToolUse hook per Step 3.2.
+merge the PreToolUse hook per [`step-3-claude-folder.md`](step-3-claude-folder.md) §3.2.
 
 ## Key outputs (per project)
 
@@ -160,14 +159,14 @@ route → service → repo → Prisma without reading those four files.
 | Python 3.9.x / "requires Python ≥3.10" | Upgrade Python (see above) **or skip Graphify** — harness continues with `/init` |
 | No `uv` / `pipx` | `brew install uv` then `uv tool install graphifyy`, or use Homebrew Python + pip |
 | Empty or tiny graph | Check `.graphifyignore` isn't excluding source; run from project root |
-| README.md triggers LLM extraction | Add `README.md` (and `docs/`) to `.graphifyignore` for code-only graphs — see harness Step 0.5.1 |
+| README.md triggers LLM extraction | Add `README.md` (and `docs/`) to `.graphifyignore` for code-only graphs — see `step-0.5-graphify.md` §0.5.1 |
 | Stale answers | `graphify update .` or `graphify extract . --force` |
-| `graphify: command not found` | Harness Step 0.5.0 install flow: `uv tool install graphifyy` (needs Python 3.10+) |
-| Hook conflicts in Claude | See HARNESS_SETUP_GUIDE Step 3.2 — merge PreToolUse, don't overwrite |
+| `graphify: command not found` | `step-0.5-graphify.md` §0.5.0 install flow: `uv tool install graphifyy` (needs Python 3.10+) |
+| Hook conflicts in Claude | See `step-3-claude-folder.md` §3.2 — merge PreToolUse, don't overwrite |
 | Copilot ignores graph | Run `/graphify` prompt explicitly; verify `graphify-out/` exists |
 
 ## Further reading
 
 - [graphify.net](https://graphify.net/) — upstream docs and command reference
-- [HARNESS_SETUP_GUIDE.md](HARNESS_SETUP_GUIDE.md) Step 0.5 — harness integration
-- [01-barebones/LEARN.md](ai-harness-starter-kit/01-barebones/LEARN.md) — file map
+- [`HARNESS_SETUP_GUIDE.md`](HARNESS_SETUP_GUIDE.md) — hub + AI-DLC runbook
+- [`step-0.5-graphify.md`](step-0.5-graphify.md) — harness integration

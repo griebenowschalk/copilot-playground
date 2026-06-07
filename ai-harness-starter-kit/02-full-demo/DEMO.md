@@ -76,7 +76,7 @@ Both get the layer chain (route → service → repo → Prisma) from the graph 
 Compare: ask the same question **without** Graphify and watch multiple files get read.
 
 Rebuild after structural changes: `graphify update .`. Daily reference:
-[`GRAPHIFY_GUIDE.md`](../../GRAPHIFY_GUIDE.md).
+[`guide/GRAPHIFY_GUIDE.md`](../../guide/GRAPHIFY_GUIDE.md).
 
 ---
 

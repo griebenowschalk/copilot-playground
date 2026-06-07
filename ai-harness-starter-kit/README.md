@@ -7,7 +7,7 @@ pattern, rebuilt portably.
 ```
 01-barebones/     ← the COMPLETE harness structure, no app. Learn what each piece is.
 02-full-demo/     ← the same harness on a runnable app, plus an interactive dashboard.
-03-dummy-project/ ← harness-free app for testing HARNESS_SETUP_GUIDE.md AI-DLC.
+03-dummy-project/ ← harness-free app for testing guide/HARNESS_SETUP_GUIDE.md AI-DLC.
 ```
 
 ## Level 1 — `01-barebones/`
@@ -34,7 +34,7 @@ interactive demo dashboard at `02-full-demo/docs/harness-explorer.html`
 
 ## Level 3 — `03-dummy-project/`
 A **harness-free** mini tasks app (same stack as `02-full-demo`) for repeatedly
-testing [HARNESS_SETUP_GUIDE.md](../HARNESS_SETUP_GUIDE.md) in AI-DLC mode. Open
+testing [`guide/HARNESS_SETUP_GUIDE.md`](../guide/HARNESS_SETUP_GUIDE.md) in AI-DLC mode. Open
 **copilot-playground** as workspace, run the scoped AI-DLC prompt from
 `03-dummy-project/README.md`, then reset with:
 
@@ -71,4 +71,4 @@ Graphify is **optional** at harness setup (Phase 0.5 asks yes/no; requires Pytho
 3.10+ — skip if unavailable). When enabled, both tools share one codebase graph (`graphify-out/`): Claude uses `/graphify query`
 and a PreToolUse hook; Copilot uses the `/graphify` prompt. The `01-barebones/` and
 `02-full-demo/` templates include Graphify files for reference; skip them if you
-decline at Phase 0.5. Daily usage: [GRAPHIFY_GUIDE.md](../GRAPHIFY_GUIDE.md).
+decline at Phase 0.5. Daily usage: [`guide/GRAPHIFY_GUIDE.md`](../guide/GRAPHIFY_GUIDE.md).

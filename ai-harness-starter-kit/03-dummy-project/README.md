@@ -1,7 +1,7 @@
 # 03-dummy-project — AI-DLC harness test fixture
 
 A **harness-free** mini tasks app for repeatedly testing
-[HARNESS_SETUP_GUIDE.md](../../HARNESS_SETUP_GUIDE.md) in AI-DLC mode. Same stack as
+[`guide/HARNESS_SETUP_GUIDE.md`](../../guide/HARNESS_SETUP_GUIDE.md) in AI-DLC mode. Same stack as
 `02-full-demo` (Next.js + TypeScript + Prisma/SQLite + Tailwind + Vitest), but with
 no `AGENTS.md`, `CLAUDE.md`, `.claude/`, `.github/`, `.vscode/`, or `docs/`.
 
@@ -17,20 +17,20 @@ pnpm test && pnpm lint && pnpm typecheck
 
 ## AI-DLC loop
 
-1. Open **copilot-playground** as your workspace (the guide lives at repo root).
+1. Open **copilot-playground** as your workspace (the guide lives in **`guide/`** at repo root).
 2. Paste this prompt (note the scoped path — harness files go under `03-dummy-project/`,
    not the monorepo root):
 
 ```
 Implement the AI harness in ai-harness-starter-kit/03-dummy-project/
-by following HARNESS_SETUP_GUIDE.md using the AI-DLC section.
+using guide/HARNESS_SETUP_GUIDE.md (hub) and the other files in guide/. All harness files must
+live under 03-dummy-project/, not the monorepo root.
 
-All harness files must live under 03-dummy-project/, not the monorepo root.
-Work one phase at a time. Pause at every AI-DLC checkpoint.
+Load the hub for AI-DLC rules; load only the step file for the current phase
+(see guide/README.md). Work one phase at a time. Pause at every AI-DLC checkpoint.
 Start with Phase 0 kickoff. At Phase 0.5, ask whether to enable Graphify — if yes,
-run Step 0.5.0 check-and-install (preflight, install if missing, re-verify); only
-skip Graphify if install fails or I decline. Do not write AGENTS.md until CLAUDE.md
-is approved. Stop at end of Step 4.
+follow guide/step-0.5-graphify.md; only skip if install fails or I decline.
+Do not write AGENTS.md until CLAUDE.md is approved. Stop at guide/step-4-context-docs.md.
 ```
 
 3. Work through checkpoints; approve drafts before the agent writes files.

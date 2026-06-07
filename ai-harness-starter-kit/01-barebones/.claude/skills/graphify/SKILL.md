@@ -39,4 +39,4 @@ for precise, hop-by-hop detail.
 - After `git pull` with significant diffs — run `graphify update .`
 - Optional: `graphify hook install` auto-rebuilds on commit (AST-only, no API cost)
 
-See `GRAPHIFY_GUIDE.md` at the monorepo root for daily usage beyond harness setup.
+See `guide/GRAPHIFY_GUIDE.md` for daily usage beyond harness setup.

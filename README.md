@@ -7,8 +7,7 @@ A monorepo for experimenting with GitHub Copilot and Claude Code settings, confi
 | Path | Purpose |
 |------|---------|
 | [`ai-harness-starter-kit/`](ai-harness-starter-kit/) | Three-level learning path for building a shared AI layer (rules, skills, MCP, hooks) that Copilot and Claude Code both read |
-| [`HARNESS_SETUP_GUIDE.md`](HARNESS_SETUP_GUIDE.md) | Step-by-step guide for rolling out that harness in any repo — manual or AI-DLC mode |
-| [`GRAPHIFY_GUIDE.md`](GRAPHIFY_GUIDE.md) | Optional Graphify layer — query the codebase graph instead of pasting files (Claude + Copilot) |
+| [`guide/`](guide/) | Harness setup — AI-DLC hub, step files, Graphify reference |
 
 The starter kit lives under `ai-harness-starter-kit/` in three folders. Each level is self-contained: open **that folder** as your workspace root (or copy its harness files to your repo root). Don't open the kit parent folder as the workspace — the tools won't find `.github/`, `.claude/`, etc.
 
@@ -41,7 +40,7 @@ Also includes a working `/figma` skill, seeded data, and an interactive [`harnes
 
 **A sandbox for practicing harness rollout.**
 
-A harness-free mini tasks app (same stack as `02-full-demo`) used to repeatedly test [`HARNESS_SETUP_GUIDE.md`](HARNESS_SETUP_GUIDE.md) in AI-DLC mode. Open **this repo** as the workspace, run the scoped AI-DLC prompt from [`03-dummy-project/README.md`](ai-harness-starter-kit/03-dummy-project/README.md), then reset and try again:
+A harness-free mini tasks app (same stack as `02-full-demo`) used to repeatedly test [`guide/HARNESS_SETUP_GUIDE.md`](guide/HARNESS_SETUP_GUIDE.md) in AI-DLC mode. Open **this repo** as the workspace, run the scoped AI-DLC prompt from [`03-dummy-project/README.md`](ai-harness-starter-kit/03-dummy-project/README.md), then reset and try again:
 
 ```bash
 cd ai-harness-starter-kit/03-dummy-project
@@ -54,7 +53,7 @@ Use this when you want to practice rolling out the harness from scratch without 
 
 1. **`01-barebones/`** — read `LEARN.md`, skim the files (~5 min). You now know the structure.
 2. **`02-full-demo/`** — run the app, open `harness-explorer.html`, walk through `DEMO.md`.
-3. **`03-dummy-project/`** — follow `HARNESS_SETUP_GUIDE.md` via AI-DLC, reset, repeat until the flow is muscle memory.
-4. **Daily work** — if you enabled Graphify, see [`GRAPHIFY_GUIDE.md`](GRAPHIFY_GUIDE.md).
+3. **`03-dummy-project/`** — follow `guide/HARNESS_SETUP_GUIDE.md` via AI-DLC, reset, repeat until the flow is muscle memory.
+4. **Daily work** — if you enabled Graphify, see [`guide/GRAPHIFY_GUIDE.md`](guide/GRAPHIFY_GUIDE.md).
 
 More detail: [`ai-harness-starter-kit/README.md`](ai-harness-starter-kit/README.md).
