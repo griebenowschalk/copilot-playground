@@ -4,6 +4,12 @@
 
 Create a `.claude/` directory at your repo root for Claude Code–specific configuration. Commit `.claude/settings.json` so the team shares the same guardrails; keep personal overrides in `.claude/settings.local.json` (gitignored).
 
+> **Copilot parity note for this step.** Hooks and permissions (§3.1–§3.2) are a
+> **Claude-only enforcement layer** — GitHub Copilot has no equivalent and relies on
+> instruction files (`AGENTS.md`, `.github/instructions/`, `.github/copilot-instructions.md`)
+> for the same guardrails. Subagents (§3.3), by contrast, **do** have a Copilot
+> equivalent — custom **chat modes** — covered in §3.3 below.
+
 | Path | Purpose |
 |------|---------|
 | `.claude/settings.json` | Hooks, permissions, and other shared Claude settings |
@@ -179,7 +185,37 @@ efficient, parallel documentation lookup rather than guessing from training data
 
 This pairing matters more than the subagent file itself: a `docs-explorer` agent that exists but is never invoked is dead weight. The rule is what makes Claude reach for it on every "how does `<library>` do X" task instead of guessing.
 
+### Copilot parity — chat modes (`.github/chatmodes/`)
+
+GitHub Copilot's equivalent of a subagent is a **custom chat mode**:
+`.github/chatmodes/<name>.chatmode.md`. Like a subagent it has its own system prompt,
+tool set, and (optionally) model, and the user selects it from the chat-mode picker. Mirror
+each subagent with a chat mode so both tools get the same specialist:
+
+```markdown
+---
+description: One line — what it does AND when to use it (shown in the mode picker).
+tools: ['codebase', 'search', 'fetch']
+model: GPT-4.1
+---
+System prompt: role, workflow, output format, and any hard "do not" rules
+(e.g. "read-only — do not edit files").
+```
+
+| Field | Notes |
+|-------|-------|
+| `description` | Shown in the chat-mode picker — be specific about *when* to use it |
+| `tools` | The tool set the mode may use — keep read-only modes free of edit/run tools |
+| `model` | Optional override |
+
+When the human opts into Copilot parity, install the **`docs-explorer` chat mode**
+alongside the subagent. A ready-to-copy template lives at
+[`chatmodes/docs-explorer.chatmode.md`](chatmodes/docs-explorer.chatmode.md) — copy it to
+`.github/chatmodes/docs-explorer.chatmode.md`. The matching "use it instead of guessing"
+rule lives in `.github/copilot-instructions.md` and `AGENTS.md`, the same way the
+subagent rule lives in `CLAUDE.md`.
+
 > **AI-DLC checkpoint — Phase 3 (subagents)**
-> Stop. Ask: **which subagents should this repo have?** Offer any existing `.claude/agents/*.md` files as a baseline, and propose `docs-explorer` as the default if the human has no other candidates in mind. If the human defers, install `docs-explorer` only. Show the draft agent file(s) and `CLAUDE.md` Subagents section for approval before writing.
+> Stop. Ask: **which subagents should this repo have?** Offer any existing `.claude/agents/*.md` files as a baseline, and propose `docs-explorer` as the default if the human has no other candidates in mind. If the human defers, install `docs-explorer` only. For each subagent, also produce the matching **Copilot chat mode** (`.github/chatmodes/*.chatmode.md`) when Copilot parity is in scope. Show the draft agent file(s), chat-mode file(s), and `CLAUDE.md` Subagents section for approval before writing.
 
 **Next:** `step-4-context-docs.md`

@@ -123,6 +123,6 @@ Add rows to the `CLAUDE.md` routing table so Claude reads context docs on demand
 
 Do **not** copy context docs into `AGENTS.md` — too long for every request.
 
-**Optional — enforce rules on edits:** create `.github/instructions/context-docs.instructions.md` with `applyTo: "docs/context/**"` mirroring the documentation rules above, so Copilot follows the same constraints when editing context files.
+**Optional — enforce rules on edits:** create `.github/instructions/context-docs.instructions.md` with `applyTo: "docs/context/**"` mirroring the documentation rules above, so Copilot follows the same constraints when editing context files. Use the instruction-file format from Step 2.5.
 
 **Next:** `step-5-mcp.md`

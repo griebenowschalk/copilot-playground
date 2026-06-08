@@ -151,7 +151,45 @@ Add to `.gitignore` if missing:
 
 ---
 
-## 5.4 When to use each server
+## 5.4 Copilot parity — `.vscode/mcp.json`
+
+`.mcp.json` configures MCP for Claude Code. **GitHub Copilot reads its MCP config from
+`.vscode/mcp.json`** instead. Mirror the same servers so both tools have the same tools;
+the schema differs in three ways:
+
+| | `.mcp.json` (Claude) | `.vscode/mcp.json` (Copilot) |
+|--|----------------------|------------------------------|
+| Top-level key | `mcpServers` | `servers` |
+| Secrets | `${VAR}` expanded from shell env | `inputs` block + `${input:<id>}` — VS Code **prompts** for the value and stores it securely |
+| Hosted servers | stdio/npx | also supports `type: http` (e.g. Copilot's hosted GitHub server) |
+
+```json
+{
+  "inputs": [
+    { "type": "promptString", "id": "figma-key", "description": "Figma API Key", "password": true }
+  ],
+  "servers": {
+    "context7": { "type": "stdio", "command": "npx", "args": ["-y", "@upstash/context7-mcp"] },
+    "github":   { "type": "http", "url": "https://api.githubcopilot.com/mcp/" },
+    "figma": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "figma-developer-mcp", "--stdio"],
+      "env": { "FIGMA_API_KEY": "${input:figma-key}" }
+    }
+  }
+}
+```
+
+- Include the **same baseline servers** as `.mcp.json` (filesystem, memory, git, context7)
+  unless a server is Claude-specific. The hosted **`github`** server is Copilot-native —
+  add it here even though it has no `.mcp.json` counterpart.
+- **Secrets:** use an `inputs` entry with `password: true` and reference it as
+  `${input:<id>}` — VS Code prompts once and stores it, so no `.env` plumbing is needed on
+  the Copilot side. Omit the `figma` server and its input if Figma was not opted in.
+- **Commit** `.vscode/mcp.json` — it contains only input placeholders, never literal keys.
+
+## 5.5 When to use each server
 
 Add this section to `CLAUDE.md` (replace the one-line "MCP servers: `.mcp.json`" bullet from Step 1):
 
@@ -175,9 +213,9 @@ Omit the `figma` bullet and "figma" when-to-use line if Figma was not opted in.
 
 ---
 
-## 5.5 Verify
+## 5.6 Verify
 
-After writing files, start Claude Code in the repo root and run `/mcp`. All configured servers should show as connected.
+After writing files, start Claude Code in the repo root and run `/mcp`. All configured servers should show as connected. **For Copilot:** open the repo in VS Code — it picks up `.vscode/mcp.json` and prompts for any `inputs` on first use; check the MCP servers list in the Copilot Chat view.
 
 | Server | Quick test prompt |
 |--------|-------------------|
@@ -195,7 +233,7 @@ CLI alternatives: `claude mcp list` and `claude mcp status <name>`.
 
 > **AI-DLC checkpoint — Phase 5**
 > Stop. Ask: **frontend project with Figma designs?** (yes → append `figma` server + `FIGMA_API_KEY` to `.env.example`; no → baseline only).
-> Show draft `.mcp.json`, `.env.example` (if Figma), gitignore additions, and `CLAUDE.md` MCP section for approval.
-> After write: verify with `/mcp`. Do not hardcode API keys.
+> Show draft `.mcp.json`, the parity `.vscode/mcp.json` (§5.4), `.env.example` (if Figma), gitignore additions, and `CLAUDE.md` MCP section for approval.
+> After write: verify with `/mcp` (Claude) and the Copilot Chat MCP list (VS Code). Do not hardcode API keys.
 
 **Next:** `step-6-skills.md`

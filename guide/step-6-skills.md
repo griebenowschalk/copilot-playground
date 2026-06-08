@@ -113,7 +113,43 @@ The skill complements the **PreToolUse hook** from `graphify claude install --pr
 
 ---
 
-## 6.5 Content rules (apply to every generated skill)
+## 6.5 Copilot parity — `.github/prompts/*.prompt.md`
+
+Claude skills split into two kinds, and each maps to a **different** Copilot artifact —
+don't force everything into prompts:
+
+| Claude skill kind | Copilot equivalent | Why |
+|-------------------|--------------------|-----|
+| **Reference** (`clean-<lang>`, `<domain>-security`, `<framework>-best-practices`) | `.github/instructions/*.instructions.md` (Step 2.5) | Conventions auto-applied by `applyTo` glob — Copilot has no "reference skill" concept |
+| **Task / workflow** (`disable-model-invocation: true` — deploy, scaffold, review) | `.github/prompts/<name>.prompt.md` | A reusable prompt the user runs deliberately with `/<name>` in Copilot Chat |
+
+So: convert each **task skill** to a prompt; the **reference skills** are already covered
+by the instruction files from Step 2.5 (don't duplicate them as prompts).
+
+```markdown
+---
+mode: agent
+description: One line — shown in the /prompt picker.
+---
+Instructions for the workflow. Reference scoped rules by name
+(e.g. "follow frontend.instructions.md"). Use ${input:name} for arguments.
+```
+
+| Field | Notes |
+|-------|-------|
+| `mode: agent` | Lets the prompt use tools / multi-step agent flow (vs. a plain chat prompt) |
+| `description` | Shown in the `/` picker — lead with what it does |
+| `${input:<id>}` | Prompts the user for an argument when the command runs (parity with skill `${input}` / args) |
+
+Mirror the demo prompts for shape: `review.prompt.md` (review the diff), `scaffold-component.prompt.md`
+(scaffold following `frontend.instructions.md`), `figma.prompt.md` (build from a Figma frame). A
+prompt should **point at** the instruction files rather than restating their rules — same
+no-duplication discipline as everywhere else.
+
+**Already created:** `.github/prompts/graphify.prompt.md` exists if Graphify was enabled
+(Step 2 / Step 0.5) — don't recreate it here.
+
+## 6.6 Content rules (apply to every generated skill)
 
 | Rule | Requirement |
 |------|-------------|
@@ -136,7 +172,7 @@ The skill complements the **PreToolUse hook** from `graphify claude install --pr
 ---
 
 > **AI-DLC checkpoint — Phase 6**
-> Stop. Propose the staple skills (§6.2) plus a shortlist of codebase-specific skills (§6.3) inferred from Phase 1 discovery. **If Graphify was enabled (Step 0.5),** confirm the `graphify` skill from §6.4 — do not duplicate. Ask the human to confirm, trim, or add to the list. If they defer, generate the staples plus one skill per major framework/runtime actually found — skip categories with no evidence in the repo. Show draft `SKILL.md` content for each before writing; every file must follow the content rules in §6.5.
+> Stop. Propose the staple skills (§6.2) plus a shortlist of codebase-specific skills (§6.3) inferred from Phase 1 discovery. **If Graphify was enabled (Step 0.5),** confirm the `graphify` skill from §6.4 — do not duplicate. Ask the human to confirm, trim, or add to the list. If they defer, generate the staples plus one skill per major framework/runtime actually found — skip categories with no evidence in the repo. For **Copilot parity (§6.5)**, convert each task/workflow skill to a `.github/prompts/*.prompt.md`; reference skills are already covered by Step 2.5 instruction files — don't duplicate. Show draft `SKILL.md` and any new prompt content before writing; every file must follow the content rules in §6.6.
 
 ---
 
@@ -147,4 +183,7 @@ Skills are auto-discovered from `.claude/skills/` — there's no routing table t
 1. **Restart if needed** — a brand-new `.claude/skills/` directory needs a session restart before Claude watches it; edits to existing skill files take effect live.
 2. **Verify routing** — ask a question that matches each skill's `description` (e.g. "what's our approach to X?") and confirm Claude loads it, or invoke directly with `/<name>`.
 
-**End of documented steps.** Future steps (scoped instructions, Copilot skill parity) will be added as new files in this folder — see `HARNESS_SETUP_GUIDE.md` extension pattern.
+**End of documented steps.** Scoped instructions (Step 2.5) and Copilot parity —
+`.github/copilot-instructions.md` (Step 1), chat modes (Step 3), `.vscode/mcp.json`
+(Step 5), and `.github/prompts/` (§6.5) — are now part of the documented flow. Add
+further steps as new files in this folder — see the `HARNESS_SETUP_GUIDE.md` extension pattern.

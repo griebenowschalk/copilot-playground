@@ -13,7 +13,8 @@ For cross-file architecture questions, use the graph (`/graphify` or `graphify q
 
 Keep this **one short paragraph** — the PreToolUse hook and `graphify` skill carry the graph-first workflow; do not expand `AGENTS.md` with query gates or when-to-use tables.
 
-And add `.github/prompts/graphify.prompt.md` for Copilot:
+And add `.github/prompts/graphify.prompt.md` for Copilot (this is the first Copilot
+prompt; the general prompt format and how skills map to prompts are covered in Step 6 §6.5):
 
 ```markdown
 ---

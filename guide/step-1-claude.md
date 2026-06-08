@@ -66,6 +66,10 @@ Read AGENTS.md first. Load detailed rules on demand via the routing table below.
 
 Adjust routing rows to match the instruction and context files you actually have.
 
+> The routing rows above point at `.github/instructions/*.instructions.md` files that are
+> **authored in Step 2.5** — a forward reference. Draft the rows now from the domains you
+> expect; reconcile them against the files that actually exist at the Step 2.5 checkpoint.
+
 **Keep `CLAUDE.md` a lean index, not content.** Like `AGENTS.md`, this file loads **every session** — and on a large codebase it grows one routing row per domain plus the MCP and Subagents sections, so the always-loaded set creeps up. Budget it:
 
 - **≤100 lines.** If it's longer, the routing table is carrying content it should only be pointing at.
@@ -74,7 +78,50 @@ Adjust routing rows to match the instruction and context files you actually have
 
 ---
 
+## Copilot parity — `.github/copilot-instructions.md`
+
+`CLAUDE.md` is Claude's always-on entry file. **GitHub Copilot's equivalent is
+`.github/copilot-instructions.md`** — Copilot loads it on every request the same way
+Claude loads `CLAUDE.md`. Author it from the **same discovery pass**, in the same phase,
+so the two entry files never drift.
+
+The key difference is how each finds scoped rules:
+
+| | Claude (`CLAUDE.md`) | Copilot (`.github/copilot-instructions.md`) |
+|--|----------------------|---------------------------------------------|
+| Scoped rules | **Manual routing table** — Claude reads the matching file on demand | **`applyTo` auto-load** — Copilot loads the matching file automatically; no table needed |
+
+So `copilot-instructions.md` carries **no routing table** — it just tells Copilot that
+scoped rules live in `.github/instructions/` and load by glob, then restates the
+always-on essentials.
+
+```markdown
+# Copilot Instructions
+
+<one-line stack summary>. See `AGENTS.md` for commands and architecture.
+
+## How rules are organized
+Detailed, scoped rules live in `.github/instructions/*.instructions.md` and load
+automatically based on the file you are editing (each file's `applyTo` glob).
+
+## Always-on essentials
+- <the same non-negotiables as AGENTS.md — a short reminder, not a copy>
+
+Reusable workflows live in `.github/prompts/` (e.g. `/review`, `/figma`).
+MCP servers are configured in `.vscode/mcp.json`.
+```
+
+- **Always-on essentials** mirror the `AGENTS.md` non-negotiables (Step 2) — a brief
+  reminder for the model, not a second copy to maintain.
+- The `.github/instructions/`, `.github/prompts/`, and `.vscode/mcp.json` pointers refer
+  to files created in later steps (2.5, 6, 5) — fine to name now.
+- Keep it short for the same reason as `CLAUDE.md`: it loads on every request.
+
+---
+
 > **AI-DLC checkpoint — Phase 1**
-> Stop after drafting `CLAUDE.md`. Review and approve before Step 2. This is the only full discovery pass — do not re-scan for AGENTS.md.
+> Stop after drafting **both entry files** — `CLAUDE.md` and `.github/copilot-instructions.md`
+> — from the one discovery pass. Review and approve before Step 2. This is the only full
+> discovery pass — do not re-scan for AGENTS.md.
 
 **Next:** `step-2-agents.md`
