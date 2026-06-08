@@ -53,64 +53,46 @@ When a senior or team lead uses AI-DLC mode, work **phase by phase** — the hum
 
 1. **One phase at a time** — map 1:1 to `step-*.md` files in this folder.
 2. **Load the current step only** — this hub for rules; step file for instructions and checkpoint.
-3. **Single discovery** — one full repo scan, then reuse that output. **With Graphify:** Phase 0.5; Phases 1–4 use graph output. **Without Graphify:** Phase 1 (`/init`); later phases reuse `CLAUDE.md` and init output.
-4. **Phase gate** — show draft → get approval → write → summarize → proceed.
+3. **Single discovery** — one repo scan, then reuse that output. **With Graphify:** Phase 0.5; Phases 1–4 use graph output. **Without Graphify:** Phase 1 (`/init`); later phases reuse `CLAUDE.md` and init output.
+4. **Phase gate** — show draft → get approval → write → tick the phase in `guide/.harness-progress.md` (one checkbox + the `Next:` line — a few tokens) → summarize → proceed.
 5. **Ask on policy**; **infer on facts** already captured in Phase 1.
 6. **Escape hatch** at every policy checkpoint: *"Specify now, or I'll infer and show a draft to approve."*
 7. **Never copy guide examples verbatim** unless they match this project — including non-negotiables: use the stack, tools, and patterns Phase 1 actually found.
 8. **Stop** at the last documented step — do not implement scoped instructions or Copilot skill parity until a new `step-*.md` exists in this folder.
 9. **Graphify is optional and non-blocking** — see `step-0.5-graphify.md`. Never halt the harness waiting on Graphify.
 10. **Stay in scope** — read only from this `guide/` folder and the target repo. Copyable templates (e.g. `agents/docs-explorer.md`, `skills/graphify/`) live inside `guide/`; never read or reference sibling demo/example projects (such as `ai-harness-starter-kit/*`) for instructions or templates — they are illustrative outputs, not sources of truth.
+11. **Keep the facilitator's context bounded** (extends rule 2) — never preload later steps or `GRAPHIFY_GUIDE.md` (on-demand reference). Run discovery and any multi-file "where is X" search in a **subagent** (`Explore` / `general-purpose`, or Graphify) so raw file dumps stay out of the main window — only the distilled draft returns. On a large repo, **bound discovery scope**: exclude vendored/generated/build dirs, start from the active subtree, and sample rather than read exhaustively. This is what keeps a large-codebase run from hitting the context limit. For large repos and monorepos, also **split the run across fresh sessions at phase gates** — see `large-codebases.md`.
+12. **Track resume state cheaply** — keep a small `guide/.harness-progress.md` ledger (next phase, phase checkboxes, artifacts, deferred decisions). Create it at Phase 0–1, update it at each gate (rule 4 — a checkbox + the `Next:` line, nothing more), and **delete it once Phase 6 is approved**. It is gitignored (`guide/.gitignore`) and stays tiny, so it costs almost nothing yet lets the rollout stop and restart in any later session. To resume: open a new conversation and read it. Full mechanics in `large-codebases.md`.
 
 ### Phase flow
 
-| Phase | Step file | Discovery? | Policy checkpoint? |
-|-------|-----------|------------|-------------------|
-| 0 — Kickoff | *(this hub)* | No | Confirm repo root only |
-| 0.5 — Graph *(optional)* | `step-0.5-graphify.md` | **Yes — if opted in** | **Ask: enable Graphify?** |
-| 1 — Init | `step-1-claude.md` | Reuse Phase 0.5 or `/init` | Light — routing rows |
-| 2 — Baseline | `step-2-agents.md` | Reuse Phase 1 | **Yes — non-negotiables** |
-| 3 — Guardrails | `step-3-claude-folder.md` | Reuse Phase 1 | **Yes — hooks, permissions & subagents** |
-| 4 — Context docs | `step-4-context-docs.md` | Targeted reads only | **Yes — which domains** |
-| 5 — MCP | `step-5-mcp.md` | No | **Yes — Figma for frontend?** |
-| 6 — Skills | `step-6-skills.md` | Reuse Phase 1 | **Yes — staple + codebase-specific list** |
+One row per phase: what to load, whether it scans, what to ask, and what to do if the human defers. Every phase follows the gate in Operating rule 4 (draft → approve → write → summarize).
 
-**Phase 0 — Kickoff:** Confirm workspace root. Open with: *"At Phase 0.5 I'll ask whether you want Graphify. Either way, we do one discovery pass — graph or `/init` — then reuse it for the rest."*
+| Phase | Step file | Discovery | Checkpoint — ask human | Infer if deferred |
+|-------|-----------|-----------|------------------------|-------------------|
+| 0 — Kickoff | *(this hub)* | No | Confirm repo root only | — |
+| 0.5 — Graph *(optional)* | `step-0.5-graphify.md` | Yes — if opted in | Enable Graphify? yes/no | Skip if declined |
+| 1 — Init | `step-1-claude.md` | Subagent scan / `/init` — reused after | Routing rows | Agent-generate from discovery |
+| 2 — Baseline | `step-2-agents.md` | Reuse Phase 1 | 3–6 non-negotiables | Propose from conventions; skip inapplicable categories |
+| 3 — Guardrails | `step-3-claude-folder.md` | Reuse Phase 1 | Hooks/permissions (§3.1) + subagents (§3.3) | Minimal lint + denies; install `docs-explorer` only |
+| 4 — Context docs | `step-4-context-docs.md` | Targeted reads only | Which domains | Doc list from tree or graph |
+| 5 — MCP | `step-5-mcp.md` | No | Figma for frontend? yes/no | Baseline only (filesystem, memory, git, context7) |
+| 6 — Skills | `step-6-skills.md` | Reuse Phase 1 | Staple + codebase-specific list | Staples (§6.2) + one per major framework/runtime found |
 
-**Phase 0.5:** Follow `step-0.5-graphify.md`. If declined or install fails, skip to Phase 1.
+**Phase notes** (only the non-obvious handling — the rest is in each step file):
 
-**Phase 1:** Follow `step-1-claude.md`. Gate: approve `CLAUDE.md` before Step 2.
-
-**Phase 2:** Follow `step-2-agents.md`. Propose only non-negotiables evidenced in discovery. Gate: approve `AGENTS.md` before Step 3.
-
-**Phase 3:** Follow `step-3-claude-folder.md`. Merge Graphify PreToolUse if Step 0.5 ran (§3.2). Set up subagents (§3.3) — default to `docs-explorer` (template at `agents/docs-explorer.md`) if the human names nothing else.
-
-**Phase 4:** Follow `step-4-context-docs.md`. Gate: approve doc list + sample; update `CLAUDE.md` routing.
-
-**Phase 5:** Follow `step-5-mcp.md`. Gate: approve `.mcp.json` + optional Figma; verify with `/mcp`.
-
-**Phase 6:** Follow `step-6-skills.md`. Propose staple skills (security, primary-language conventions, testing) plus codebase-specific skills inferred from Phase 1 discovery. Gate: approve the skill list and sample `SKILL.md` drafts before writing.
-
-### Checkpoint quick-reference
-
-| Checkpoint | Step file | Ask human | Infer if deferred |
-|------------|-----------|-----------|-------------------|
-| Graphify | `step-0.5-graphify.md` | Enable Graphify? yes/no | Skip if declined |
-| `CLAUDE.md` | `step-1-claude.md` | Routing rows | Agent-generate from discovery |
-| Non-negotiables | `step-2-agents.md` | 3–6 universal rules | Propose from conventions; skip inapplicable categories |
-| Hooks | `step-3-claude-folder.md` | PostToolUse / Stop / denies | Minimal lint + default denies |
-| Subagents | `step-3-claude-folder.md` §3.3 | Which subagents to add | Install `docs-explorer` only |
-| Context docs | `step-4-context-docs.md` | Which domains | Doc list from tree or graph |
-| MCP | `step-5-mcp.md` | Figma for frontend? yes/no | Baseline only (filesystem, memory, git, context7) |
-| Skills | `step-6-skills.md` | Which staple + codebase-specific skills | Staples (§6.2) + one skill per major framework/runtime found |
+- **Phase 0:** Confirm workspace root. Open with: *"At Phase 0.5 I'll ask whether you want Graphify. Either way, we do one discovery pass — graph or `/init` — then reuse it for the rest."* On a **large repo or monorepo**, read `large-codebases.md` first — it covers per-package scoping and splitting the run across fresh context windows at phase gates.
+- **Phase 0.5 / 1:** If Graphify is declined or install fails, fall through to `/init` discovery in Phase 1.
+- **Phase 3:** Merge Graphify PreToolUse if Step 0.5 ran (§3.2). Default subagent is `docs-explorer` (template at `agents/docs-explorer.md`) when the human names nothing else.
+- **Phase 6:** Staples are security, primary-language conventions, and testing (§6.2), plus codebase-specific skills from Phase 1 discovery.
 
 ### Extension pattern
 
 When adding a new harness step:
 
 1. Create `step-N-<name>.md` in this folder with content + **AI-DLC checkpoint** blockquote.
-2. Add a row to **`README.md`** index and the phase table above.
-3. Add a **Phase N** summary line under Phase flow.
+2. Add a row to **`README.md`** index and the **Phase flow** table above.
+3. Add a **Phase note** under the table only if the phase needs non-obvious handling.
 
 Step file template:
 
@@ -127,20 +109,4 @@ Step file template:
 
 ## File index
 
-| File | Purpose |
-|------|---------|
-| `README.md` | Index and navigation |
-| `HARNESS_SETUP_GUIDE.md` | This hub — AI-DLC runbook, example prompt |
-| `GRAPHIFY_GUIDE.md` | Graphify daily reference (optional layer) |
-| `00-how-files-relate.md` | AGENTS.md vs CLAUDE.md — creation vs load order |
-| `step-0.5-graphify.md` | Optional codebase graph (harness integration) |
-| `step-1-claude.md` | Initialize `CLAUDE.md` |
-| `step-2-agents.md` | Set up `AGENTS.md` |
-| `step-3-claude-folder.md` | `.claude/` hooks, permissions, and subagents (§3.3) |
-| `agents/docs-explorer.md` | Copyable subagent template referenced from §3.3 |
-| `skills/graphify/` | Copyable Graphify skill template referenced from §0.5.3 and §6.4 |
-| `step-4-context-docs.md` | `docs/context/` reference docs |
-| `step-5-mcp.md` | MCP servers (`.mcp.json`) |
-| `step-6-skills.md` | Project skills (`.claude/skills/<name>/SKILL.md`) |
-
-More steps will be added as new files in this folder using the extension pattern above.
+See **`README.md`** for the full file index and step-order tables — not repeated here to keep this hub (loaded on every phase) lean. More steps are added as new files in this folder using the extension pattern above.

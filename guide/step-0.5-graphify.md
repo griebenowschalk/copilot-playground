@@ -100,7 +100,7 @@ graphify hook install                # recommended — AST-only rebuild on commi
 
 Verify hooks: `graphify hook status`
 
-> **Known quirk:** `graphify install --project` may also drop a stray `.claude/CLAUDE.md` containing just the skill-routing line (e.g. `# graphify` + a `.claude/skills/graphify/SKILL.md` pointer). Claude Code does **not** auto-load `CLAUDE.md` from inside `.claude/` — only the root `CLAUDE.md` (and any `CLAUDE.md` in the directory you're working in) — so that file would sit unused. Fold its routing line into the root `CLAUDE.md` (as a routing row, see `step-1-claude.md`) and delete `.claude/CLAUDE.md`.
+> **Known quirk:** `graphify install --project` may also drop a stray `.claude/CLAUDE.md` containing just the skill-routing line (e.g. `# graphify` + a `.claude/skills/graphify/SKILL.md` pointer). Claude Code does **not** auto-load `CLAUDE.md` from inside `.claude/` — only the root `CLAUDE.md` (and any `CLAUDE.md` in the directory you're working in) — so that file would sit unused. Fold its routing line into the root `CLAUDE.md` (as a routing row, see `step-1-claude.md`), then force-delete the stray file: `rm -f .claude/CLAUDE.md`.
 
 **Outputs:**
 
@@ -155,6 +155,6 @@ Do **not** run `graphify extract .` every session — use `update` incrementally
 ---
 
 > **AI-DLC checkpoint — Phase 0.5**
-> **Ask:** *"Enable Graphify for this project?"* If **no**, skip to Phase 1 (`step-1-claude.md`) with `/init`. If **yes**, run **0.5.0 check-and-install**: preflight → install if missing → re-verify. Only run **0.5.1–0.5.4** when `graphify --version` succeeds — include **`graphify hook install`** (recommended). If install fails or human skips, continue to Phase 1 with `/init`.
+> **Ask:** *"Enable Graphify for this project?"* — and size the recommendation to the codebase: Graphify's payoff (structured call-chain answers replacing multi-file reads) scales with codebase size and interconnectedness, while setup (extract, install × 3, hook install) and the always-on PreToolUse hook are **fixed costs** paid regardless of size. On a small or shallow codebase (rough heuristic: a couple dozen files, 1–2 hop call chains), reading the handful of relevant files directly is often just as fast — lean toward `/init` there. On larger, more interconnected codebases, lean toward enabling. If **no**, skip to Phase 1 (`step-1-claude.md`) with `/init`. If **yes**, run **0.5.0 check-and-install**: preflight → install if missing → re-verify. Only run **0.5.1–0.5.4** when `graphify --version` succeeds — include **`graphify hook install`** (recommended). If install fails or human skips, continue to Phase 1 with `/init`.
 
 **Next:** `step-1-claude.md`

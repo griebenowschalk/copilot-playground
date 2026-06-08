@@ -18,6 +18,13 @@ The hook nudges toward the graph; this file is the decision detail.
 1. Read `GRAPH_REPORT.md` for orientation **or** run `graphify query "<question>"`
 2. Read source files **only** for gaps the query did not cover (exact lines, implementation detail)
 
+**Phrasing matters — matching is keyword/BFS, not semantic.** Name a real symbol
+(route handler, function, class — pull one from `GRAPH_REPORT.md` if unsure) rather
+than an abstract architecture term. `"layer dependencies"` tends to match the literal
+string `dependencies` in `package.json`; `"architecture boundaries"` often returns
+"No matching nodes." Either wastes a round-trip. If a query misses, reformulate around
+a real symbol name — don't retry synonyms of the same abstract phrase.
+
 ## Do not force graph-first
 
 | Situation | Why |
@@ -27,6 +34,7 @@ The hook nudges toward the graph; this file is the decision detail.
 | Graph likely stale (large refactor since last extract) | Run `graphify update .` first, or read source if urgent |
 | Need exact line-level text | Graph shows relationships, not full source |
 | Tiny change in a known file | One `Read` is cheaper than query + follow-up reads |
+| Small, shallow codebase (rough heuristic: a couple dozen files, 1–2 hop call chains) | Reading the handful of relevant files directly is often as fast as formulating + possibly reformulating a query — the graph's edge widens with size and interconnectedness |
 
 ## Keep the graph fresh
 

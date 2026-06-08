@@ -28,6 +28,12 @@ In Claude Code:
 
 If you're not in Claude Code, perform an equivalent single scan and generate `CLAUDE.md` at the repo root. Omit Graphify rows from the routing table.
 
+**Large repos — protect the context window.** `/init` (or an equivalent scan) on a big monorepo can consume the window before any harness work starts. Keep discovery bounded and out of the main context:
+
+- **Delegate the scan to a subagent** (`Explore` / `general-purpose`) that returns only the distilled draft — raw file dumps never enter the facilitator's window.
+- **Bound the scope:** exclude vendored, generated, and build dirs (`node_modules/`, `dist/`, `.next/`, `src/generated/`); start from the active subtree; sample representative files rather than reading exhaustively.
+- This is the single biggest lever against hitting the context limit on a large codebase — Graphify (Path A) avoids it structurally by querying the graph instead of reading source.
+
 ---
 
 ## CLAUDE.md template (both paths)
@@ -59,6 +65,12 @@ Read AGENTS.md first. Load detailed rules on demand via the routing table below.
 ```
 
 Adjust routing rows to match the instruction and context files you actually have.
+
+**Keep `CLAUDE.md` a lean index, not content.** Like `AGENTS.md`, this file loads **every session** — and on a large codebase it grows one routing row per domain plus the MCP and Subagents sections, so the always-loaded set creeps up. Budget it:
+
+- **≤100 lines.** If it's longer, the routing table is carrying content it should only be pointing at.
+- The routing table is a **pointer index** — `If task → read this file`. Never inline the rules or context themselves; that's what the scoped instruction files, context docs, and skills are for (they load on demand).
+- One row per file, not per topic. Collapse near-duplicate rows; if two domains always load together, give them one shared doc and one row.
 
 ---
 

@@ -37,9 +37,11 @@ Default: hooks keep the graph fresh — do not re-extract every session. See [wh
 ## Query commands
 
 ```bash
-graphify query "how do API routes reach the database?"
-graphify query "layer dependencies"
+graphify query "how does <RouteHandler> reach the database?"   # name a real symbol, e.g. POST()
+graphify query "what calls <FunctionName>?"
 graphify path "SymbolA" "SymbolB"
 graphify explain "SymbolName"
 ```
+
+**Phrase around concrete symbols that exist as graph nodes** (a route handler, function, or class name from `GRAPH_REPORT.md` or `graphify stats`), not abstract architecture terms (`"layer dependencies"`, `"architecture boundaries"`). Matching is keyword/BFS-based, not semantic — abstract phrasings often return "No matching nodes" or hit unrelated config strings (e.g. `"dependencies"` matching `package.json`), wasting a round-trip. If a query misses, look up a real symbol name and reformulate around it rather than retrying synonyms.
 </content>

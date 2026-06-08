@@ -24,7 +24,7 @@ Instructions are prescriptive ("validate input at API boundaries"). Context docs
 
 ## Which code sections to document
 
-Document **boundaries and flows**, not every file. **If Graphify enabled**, run `graphify query "<domain> layer boundaries and entry points"` before reading source for that domain. One doc per area a new senior would need on day one:
+Document **boundaries and flows**, not every file. **If Graphify enabled**, run `graphify query "<domain> layer boundaries and entry points"` before reading source for that domain. **In a monorepo**, generate docs for the **active package only**, on demand — don't document every package up front (see `large-codebases.md`). One doc per area a new senior would need on day one:
 
 | Code area | Suggested doc | What to capture |
 |-----------|---------------|-----------------|

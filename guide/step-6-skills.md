@@ -12,6 +12,8 @@ Skills are on-demand procedures and reference material that load only when relev
 
 They live at `.claude/skills/<name>/SKILL.md` — the directory name becomes the `/name` command. Project skills are committed and shared with the team; this step covers project skills only (not personal `~/.claude/skills/`).
 
+**In a monorepo**, scope skills to the **active package** and use the `paths:` frontmatter (§6.1) so a skill only loads when working in its package — don't generate the full skill set for every package up front (see `large-codebases.md`).
+
 ---
 
 ## 6.1 Anatomy of a skill file

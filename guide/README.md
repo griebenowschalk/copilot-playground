@@ -6,6 +6,7 @@ All harness rollout documentation lives in this folder. Copy the whole **`guide/
 |------|---------|
 | **`HARNESS_SETUP_GUIDE.md`** | **Start here** — hub, AI-DLC runbook, example prompt |
 | `GRAPHIFY_GUIDE.md` | Graphify daily reference (optional) |
+| `large-codebases.md` | Large repos / monorepos + pause-and-resume across sessions via the `guide/.harness-progress.md` ledger (optional, on demand) |
 | `README.md` | This index |
 | `00-how-files-relate.md` | AGENTS.md vs CLAUDE.md |
 | `step-0.5-graphify.md` | Optional Graphify harness integration |
@@ -31,4 +32,4 @@ All harness rollout documentation lives in this folder. Copy the whole **`guide/
 | 5 | MCP | `step-5-mcp.md` | `.mcp.json`, `.env.example` (if Figma), `CLAUDE.md` MCP section |
 | 6 | Skills | `step-6-skills.md` | `.claude/skills/<name>/SKILL.md` (staple + codebase-specific) |
 
-**AI-DLC:** load `HARNESS_SETUP_GUIDE.md` plus **only the current step file** for the active phase.
+**AI-DLC:** load `HARNESS_SETUP_GUIDE.md` plus **only the current step file** for the active phase. On a **large repo or monorepo**, also read `large-codebases.md` — it covers per-package scoping and splitting the run across fresh context windows at phase gates.

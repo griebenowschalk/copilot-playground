@@ -95,6 +95,10 @@ merge the PreToolUse hook per [`step-3-claude-folder.md`](step-3-claude-folder.m
 
 `graphify-out/` is gitignored — rebuild locally after clone.
 
+**Reading `GRAPH_REPORT.md`:**
+- **God nodes** are connectivity counts, not domain importance — config files (`tsconfig.json`'s `compilerOptions`, `package.json`'s `scripts`) often outrank real domain hubs (route handlers, core services) simply by edge count. Skim past config-file entries to find the domain hubs further down the list; consider adding noisy config files to `.graphifyignore` if they consistently crowd out useful signal.
+- **Community names** stay as placeholders (`Community 0`, `Community 1`, …) unless an LLM backend is configured for semantic naming — without one, the "Community Hubs" section isn't navigable by name and you'd need to open each community to learn what it contains. That's the trade for the default $0-token, tree-sitter-only setup; only add a backend if broad-orientation reads on a large codebase are frequent enough to amortize the cost.
+
 ## Update strategy
 
 Run all commands from the **project workspace root** (the target repo's root, where the harness files live), not a monorepo parent.
@@ -152,13 +156,15 @@ graphify stats              # verify graph health
 ## Query commands
 
 ```bash
-graphify query "how do API routes reach the database?"
-graphify query "layer dependencies"
+graphify query "how does <RouteHandler> reach the database?"   # name a real symbol, e.g. POST()
+graphify query "what calls <FunctionName>?"
 graphify path "SymbolA" "SymbolB"
 graphify explain "SymbolName"
 ```
 
 Read `GRAPH_REPORT.md` for broad orientation; use `graphify query` for precise hops.
+
+**Phrase queries around concrete symbols** (route handlers, function/class names that exist as graph nodes — pull real ones from `GRAPH_REPORT.md`), not abstract architecture terms. Matching is keyword/BFS, not semantic: `"layer dependencies"` tends to hit the literal string `dependencies` in `package.json` rather than architectural layers, and `"architecture boundaries"` often returns "No matching nodes" — both cost a wasted round-trip. If a query misses, reformulate around a real symbol name instead of retrying synonyms.
 
 ## In Claude Code
 
@@ -199,6 +205,15 @@ graphify update .           # only if hooks off, or pull had big structural chan
 
 Example: *"How do tasks flow from the API to the database?"* — the graph returns
 route → service → repo → Prisma without reading those four files.
+
+**Caveat — this only holds when the query hits.** A query phrased around an abstract
+term (`"layer dependencies"`, `"architecture boundaries"`) that returns "No matching
+nodes" or a config-file false-positive costs a wasted round-trip *on top of* the
+eventual file read — net more expensive than reading the files directly. The savings
+above assume queries are phrased around real symbol names (see **Query commands**).
+Also note the comparison is most favorable on larger, denser codebases — on a small
+repo (a couple dozen files, shallow call chains) reading the 4–5 relevant files
+directly is often just as fast and avoids the reformulation risk entirely.
 
 ## When to rebuild
 
