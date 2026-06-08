@@ -60,6 +60,7 @@ When a senior or team lead uses AI-DLC mode, work **phase by phase** — the hum
 7. **Never copy guide examples verbatim** unless they match this project — including non-negotiables: use the stack, tools, and patterns Phase 1 actually found.
 8. **Stop** at the last documented step — do not implement scoped instructions or Copilot skill parity until a new `step-*.md` exists in this folder.
 9. **Graphify is optional and non-blocking** — see `step-0.5-graphify.md`. Never halt the harness waiting on Graphify.
+10. **Stay in scope** — read only from this `guide/` folder and the target repo. Copyable templates (e.g. `agents/docs-explorer.md`, `skills/graphify/`) live inside `guide/`; never read or reference sibling demo/example projects (such as `ai-harness-starter-kit/*`) for instructions or templates — they are illustrative outputs, not sources of truth.
 
 ### Phase flow
 
@@ -137,6 +138,7 @@ Step file template:
 | `step-2-agents.md` | Set up `AGENTS.md` |
 | `step-3-claude-folder.md` | `.claude/` hooks, permissions, and subagents (§3.3) |
 | `agents/docs-explorer.md` | Copyable subagent template referenced from §3.3 |
+| `skills/graphify/` | Copyable Graphify skill template referenced from §0.5.3 and §6.4 |
 | `step-4-context-docs.md` | `docs/context/` reference docs |
 | `step-5-mcp.md` | MCP servers (`.mcp.json`) |
 | `step-6-skills.md` | Project skills (`.claude/skills/<name>/SKILL.md`) |

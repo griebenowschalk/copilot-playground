@@ -100,6 +100,8 @@ graphify hook install                # recommended — AST-only rebuild on commi
 
 Verify hooks: `graphify hook status`
 
+> **Known quirk:** `graphify install --project` may also drop a stray `.claude/CLAUDE.md` containing just the skill-routing line (e.g. `# graphify` + a `.claude/skills/graphify/SKILL.md` pointer). Claude Code does **not** auto-load `CLAUDE.md` from inside `.claude/` — only the root `CLAUDE.md` (and any `CLAUDE.md` in the directory you're working in) — so that file would sit unused. Fold its routing line into the root `CLAUDE.md` (as a routing row, see `step-1-claude.md`) and delete `.claude/CLAUDE.md`.
+
 **Outputs:**
 
 - `graphify-out/GRAPH_REPORT.md` — god nodes, communities, suggested questions
@@ -115,7 +117,7 @@ Verify: `graphify stats`
 
 ## 0.5.3 Graph-first skill *(Graphify only)*
 
-`graphify install --project` may create a minimal skill — **replace or merge** with the harness template from `01-barebones/.claude/skills/graphify/`:
+`graphify install --project` may create a minimal skill — **replace or merge** with the harness template at [`skills/graphify/`](skills/graphify/) in this guide folder (copy to `.claude/skills/graphify/` in the target repo):
 
 | File | Role |
 |------|------|

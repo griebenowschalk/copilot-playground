@@ -35,7 +35,7 @@ lacks detail.
 | **`AGENTS.md` one-liner** | Short reminder only — do not paste full workflow here |
 | **Copilot `/graphify` prompt** | Manual graph-first for VS Code Copilot (no hook) |
 
-See `.claude/skills/graphify/when-to-use.md` in `01-barebones/` for the full decision table.
+See [`skills/graphify/when-to-use.md`](skills/graphify/when-to-use.md) in this guide folder for the full decision table — it's the template copied to `.claude/skills/graphify/when-to-use.md` in the target repo.
 
 ## One-time install (per machine)
 
@@ -97,7 +97,7 @@ merge the PreToolUse hook per [`step-3-claude-folder.md`](step-3-claude-folder.m
 
 ## Update strategy
 
-Run all commands from the **project workspace root** (e.g. `02-full-demo/`), not the monorepo parent.
+Run all commands from the **project workspace root** (the target repo's root, where the harness files live), not a monorepo parent.
 
 ### Setup once
 
@@ -142,7 +142,7 @@ big refactor / changed .graphifyignore?
 ### Build and refresh (quick reference)
 
 ```bash
-cd ai-harness-starter-kit/02-full-demo   # example
+cd <target-repo-root>       # the project workspace root
 graphify extract .          # once at setup
 graphify hook install       # recommended
 graphify update .           # incremental when hooks are off or after pull

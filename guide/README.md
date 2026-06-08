@@ -13,6 +13,7 @@ All harness rollout documentation lives in this folder. Copy the whole **`guide/
 | `step-2-agents.md` | Set up `AGENTS.md` |
 | `step-3-claude-folder.md` | `.claude/` hooks, permissions, and subagents (§3.3) |
 | `agents/docs-explorer.md` | Copyable subagent template referenced from §3.3 — install in `.claude/agents/` |
+| `skills/graphify/` | Copyable Graphify skill template (`SKILL.md` + `when-to-use.md`) referenced from Step 0.5 §0.5.3 and §6.4 — install in `.claude/skills/graphify/` |
 | `step-4-context-docs.md` | `docs/context/` reference docs |
 | `step-5-mcp.md` | MCP servers (`.mcp.json`) |
 | `step-6-skills.md` | Project skills (`.claude/skills/<name>/SKILL.md`) |

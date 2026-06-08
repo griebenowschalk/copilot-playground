@@ -98,7 +98,7 @@ These are **reference content** skills — write them like the team's style guid
 
 **Skip this section** if Graphify was declined or install failed.
 
-Do not add a second graphify skill — one reference skill is enough. Copy from `01-barebones/.claude/skills/graphify/`:
+Do not add a second graphify skill — one reference skill is enough. Copy the template at [`skills/graphify/`](skills/graphify/) in this guide folder to `.claude/skills/graphify/` in the target repo:
 
 | File | Purpose |
 |------|---------|
