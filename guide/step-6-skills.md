@@ -94,7 +94,24 @@ These are **reference content** skills — write them like the team's style guid
 
 ---
 
-## 6.4 Content rules (apply to every generated skill)
+## 6.4 Graphify skill *(only if Step 0.5 completed)*
+
+**Skip this section** if Graphify was declined or install failed.
+
+Do not add a second graphify skill — one reference skill is enough. Copy from `01-barebones/.claude/skills/graphify/`:
+
+| File | Purpose |
+|------|---------|
+| `SKILL.md` | Graph-first gate, query commands, `description` for auto-routing on architecture/cross-file work |
+| `when-to-use.md` | When to query vs read source — linked from SKILL.md, not duplicated in `AGENTS.md` |
+
+The skill complements the **PreToolUse hook** from `graphify claude install --project` (Step 0.5.2) — the hook enforces habit; the skill is the operator manual. At Phase 6, verify the skill exists and matches the template; do not regenerate unless the codebase needs project-specific query examples.
+
+**At Phase 6 checkpoint:** if Graphify is on, confirm `graphify` skill is present — do not propose it again in the §6.3 shortlist.
+
+---
+
+## 6.5 Content rules (apply to every generated skill)
 
 | Rule | Requirement |
 |------|-------------|
@@ -117,7 +134,7 @@ These are **reference content** skills — write them like the team's style guid
 ---
 
 > **AI-DLC checkpoint — Phase 6**
-> Stop. Propose the staple skills (§6.2) plus a shortlist of codebase-specific skills (§6.3) inferred from Phase 1 discovery. Ask the human to confirm, trim, or add to the list. If they defer, generate the staples plus one skill per major framework/runtime actually found — skip categories with no evidence in the repo. Show draft `SKILL.md` content for each before writing; every file must follow the content rules in §6.4.
+> Stop. Propose the staple skills (§6.2) plus a shortlist of codebase-specific skills (§6.3) inferred from Phase 1 discovery. **If Graphify was enabled (Step 0.5),** confirm the `graphify` skill from §6.4 — do not duplicate. Ask the human to confirm, trim, or add to the list. If they defer, generate the staples plus one skill per major framework/runtime actually found — skip categories with no evidence in the repo. Show draft `SKILL.md` content for each before writing; every file must follow the content rules in §6.5.
 
 ---
 

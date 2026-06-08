@@ -93,25 +93,66 @@ Add other root markdown as needed (`AGENTS.md`, `CLAUDE.md`, …) or use `*.md` 
 ```bash
 graphify extract .
 graphify install --project
-graphify claude install --project
+graphify claude install --project    # required — PreToolUse hook nudges graph before Glob/Grep/Read
 graphify vscode install --project
-graphify hook install    # optional: auto-rebuild on commit
+graphify hook install                # recommended — AST-only rebuild on commit (no API cost)
 ```
+
+Verify hooks: `graphify hook status`
 
 **Outputs:**
 
 - `graphify-out/GRAPH_REPORT.md` — god nodes, communities, suggested questions
 - `graphify-out/graph.json` — queryable graph
-- `.claude/skills/graphify/SKILL.md` — Claude `/graphify` skill
+- `.claude/skills/graphify/SKILL.md` + `when-to-use.md` — graph-first gate and query playbook
 - `.github/prompts/graphify.prompt.md` — Copilot `/graphify` prompt (create if not auto-installed)
-- CLAUDE.md graphify section + PreToolUse hook (via `graphify claude install --project`)
-- AGENTS.md graphify section (via `graphify vscode install --project` — merge with Step 2 draft)
+- CLAUDE.md graphify routing row + PreToolUse hook (via `graphify claude install --project`)
+- Short Graphify line in `AGENTS.md` (via `graphify vscode install` — merge in Step 2; keep minimal)
 
 Verify: `graphify stats`
 
 ---
 
+## 0.5.3 Graph-first skill *(Graphify only)*
+
+`graphify install --project` may create a minimal skill — **replace or merge** with the harness template from `01-barebones/.claude/skills/graphify/`:
+
+| File | Role |
+|------|------|
+| `SKILL.md` | Graph-first gate, query commands, `description` tuned for auto-routing on architecture/cross-file tasks |
+| `when-to-use.md` | When to query vs when to read source (progressive disclosure — not loaded unless linked) |
+
+**Do not** paste the full graph-first workflow into `AGENTS.md` — the hook + skill carry that behavior; `AGENTS.md` stays one short line (Step 2).
+
+**Three layers (use all when Graphify is on):**
+
+1. **PreToolUse hook** (`graphify claude install`) — automatic nudge before search/read storms
+2. **`graphify` skill** — decision gate + query commands when architecture tasks match
+3. **`AGENTS.md` one-liner** — fallback reminder for Copilot (no hook)
+
+Update `CLAUDE.md` routing row to point at `.claude/skills/graphify/SKILL.md` (see `step-1-claude.md`).
+
+---
+
+## 0.5.4 Update strategy *(recommended)*
+
+Default playbook — full detail in `GRAPHIFY_GUIDE.md` § Update strategy:
+
+| When | Command |
+|------|---------|
+| First setup / no `graphify-out/` | `graphify extract .` |
+| After setup | `graphify hook install` **(recommended)** — graph stays fresh on commit |
+| `git pull` (hooks on) | Usually nothing — hook rebuilds on next commit; run `graphify update .` if you need the graph **before** committing |
+| `git pull` (no hooks) | `graphify update .` |
+| Normal day (hooks on) | Nothing — query freely |
+| Big refactor / graph looks wrong (`graphify stats`) | `graphify update .` first; then `graphify extract . --force` if still stale |
+| Fast refresh, skip clustering | `graphify update . --no-cluster` |
+
+Do **not** run `graphify extract .` every session — use `update` incrementally; full extract is the exception.
+
+---
+
 > **AI-DLC checkpoint — Phase 0.5**
-> **Ask:** *"Enable Graphify for this project?"* If **no**, skip to Phase 1 (`step-1-claude.md`) with `/init`. If **yes**, run **0.5.0 check-and-install**: preflight → install if missing → re-verify. Only run **0.5.1–0.5.2** when `graphify --version` succeeds. If install fails or human skips, continue to Phase 1 with `/init`.
+> **Ask:** *"Enable Graphify for this project?"* If **no**, skip to Phase 1 (`step-1-claude.md`) with `/init`. If **yes**, run **0.5.0 check-and-install**: preflight → install if missing → re-verify. Only run **0.5.1–0.5.4** when `graphify --version` succeeds — include **`graphify hook install`** (recommended). If install fails or human skips, continue to Phase 1 with `/init`.
 
 **Next:** `step-1-claude.md`

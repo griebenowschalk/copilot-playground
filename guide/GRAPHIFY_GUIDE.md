@@ -25,6 +25,18 @@ Read/Grep raw files (last resort)
 Query the graph first (~30–150 tokens). Read source files only when the graph
 lacks detail.
 
+## Harness layers (when Graphify is enabled)
+
+| Layer | What it does |
+|-------|----------------|
+| **PreToolUse hook** | `graphify claude install --project` — nudges before Glob/Grep/Read storms |
+| **`graphify` skill** | Graph-first gate + query commands; auto-routes on architecture/cross-file tasks |
+| **`when-to-use.md`** | When to query vs read source — linked from skill, not in `AGENTS.md` |
+| **`AGENTS.md` one-liner** | Short reminder only — do not paste full workflow here |
+| **Copilot `/graphify` prompt** | Manual graph-first for VS Code Copilot (no hook) |
+
+See `.claude/skills/graphify/when-to-use.md` in `01-barebones/` for the full decision table.
+
 ## One-time install (per machine)
 
 **Requires Python 3.10+.** Check first:
@@ -83,16 +95,58 @@ merge the PreToolUse hook per [`step-3-claude-folder.md`](step-3-claude-folder.m
 
 `graphify-out/` is gitignored — rebuild locally after clone.
 
-## Build and refresh
+## Update strategy
 
-Run from the **project workspace root** (e.g. `02-full-demo/`), not the monorepo parent:
+Run all commands from the **project workspace root** (e.g. `02-full-demo/`), not the monorepo parent.
+
+### Setup once
+
+```bash
+graphify extract .              # full build (code-only with .graphifyignore)
+graphify hook install           # recommended — AST-only rebuild on commit, no API cost
+graphify hook status            # verify hooks are active
+```
+
+### Decision tree (daily)
+
+```
+graphify-out/ missing?
+  └─ yes → graphify extract .
+  └─ no  → hooks installed? (graphify hook status)
+            ├─ yes → normal work: do nothing (hook rebuilds on commit)
+            │        git pull: usually nothing; run graphify update . only if you
+            │        need accurate graph before your next commit
+            └─ no  → git pull or end of day → graphify update .
+
+graph looks wrong? (graphify stats — node count dropped, stale answers)
+  └─ graphify update . first
+  └─ still wrong → graphify extract . --force
+
+big refactor / changed .graphifyignore?
+  └─ graphify extract . --force
+```
+
+### Command cheat sheet
+
+| Command | When |
+|---------|------|
+| `graphify extract .` | First time only (or after clone before hooks) |
+| `graphify hook install` | **Recommended** at setup — best ongoing ROI |
+| `graphify update .` | After `git pull` without hooks, or before architecture work if graph may be stale |
+| `graphify update . --no-cluster` | Faster incremental refresh; skip community clustering |
+| `graphify extract . --force` | Graph shrunk, wrong, or huge structural change |
+| `graphify stats` | Sanity check before a big architecture session |
+
+**Avoid:** `graphify extract .` every session — full re-parse is wasteful when `update` or git hooks suffice.
+
+### Build and refresh (quick reference)
 
 ```bash
 cd ai-harness-starter-kit/02-full-demo   # example
-graphify extract .          # full build (code-only, offline for TS/Prisma)
-graphify update .           # incremental after edits
-graphify stats              # verify graph exists
-graphify hook install       # optional: auto-rebuild on commit (AST-only)
+graphify extract .          # once at setup
+graphify hook install       # recommended
+graphify update .           # incremental when hooks are off or after pull
+graphify stats              # verify graph health
 ```
 
 ## Query commands
@@ -108,10 +162,11 @@ Read `GRAPH_REPORT.md` for broad orientation; use `graphify query` for precise h
 
 ## In Claude Code
 
-- Type `/graphify .` to build or refresh the graph
-- Type `/graphify query "..."` for targeted questions
-- PreToolUse hook (from `graphify claude install --project`) nudges toward the graph before Glob/Grep/Read storms
-- `CLAUDE.md` routing table includes architecture → `GRAPH_REPORT.md`
+- **PreToolUse hook** (`graphify claude install --project`) — primary automatic nudge before Glob/Grep/Read
+- **`graphify` skill** — graph-first gate; auto-routes on architecture/cross-file tasks via `description`
+- `/graphify` or `graphify query "..."` for targeted questions
+- `CLAUDE.md` routing row → `.claude/skills/graphify/SKILL.md`
+- Decision detail: `when-to-use.md` in the skill folder (when to query vs read source)
 
 ## In GitHub Copilot (VS Code)
 
@@ -122,17 +177,17 @@ Read `GRAPH_REPORT.md` for broad orientation; use `graphify query` for precise h
 
 ## Daily workflow
 
-**Morning (after pull):**
+**If `graphify hook install` is active:** commits keep the graph fresh — no manual update needed for normal edits.
+
+**Morning (after `git pull`):**
 ```bash
-graphify update .
+graphify hook status        # if active, skip unless you need the graph before committing
+graphify update .           # only if hooks off, or pull had big structural changes
 ```
 
-**During work:** ask architecture questions via `/graphify query` (Claude) or `/graphify` (Copilot) before pasting code snippets.
+**During work:** `/graphify query` (Claude) or `/graphify` (Copilot) before pasting multiple files.
 
-**After structural changes** (new modules, moved files, renamed layers):
-```bash
-graphify extract .          # or graphify update .
-```
+**Structural changes** (new modules, moved files): hook handles on commit; if hooks off, `graphify update .`. Full `extract . --force` only if `graphify stats` looks wrong.
 
 ## Token tip
 
@@ -147,10 +202,7 @@ route → service → repo → Prisma without reading those four files.
 
 ## When to rebuild
 
-- After `git pull` with significant structural diffs
-- After adding modules, routes, or services
-- Before a large refactor or architecture review
-- Use `graphify update .` for incremental; `graphify extract . --force` if graph looks stale or shrunk after a refactor
+See **Update strategy** above. Short version: `update` incrementally; `extract --force` only when the graph is broken or after a major restructure; rely on **git hooks** for everything else.
 
 ## Troubleshooting
 

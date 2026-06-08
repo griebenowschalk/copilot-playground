@@ -1,42 +1,46 @@
 ---
 name: graphify
-description: Build or query a codebase knowledge graph for architecture questions without reading every file.
-allowed-tools: Bash, Read
+description: >-
+  Query the codebase knowledge graph before reading multiple files — use for
+  architecture, cross-layer flows (API/service/repo), refactors spanning modules,
+  onboarding, and "who calls what" debugging. Requires graphify-out/ from
+  graphify extract. Do not use for single-file edits when scoped rules already apply.
+when_to_use: >-
+  Cross-layer questions, harness discovery, multi-module refactors, dependency
+  tracing, or when the PreToolUse hook suggests consulting the graph.
+allowed-tools: Bash, Read, Grep
 ---
-<!-- Claude skill. Invoke with /graphify. Copilot mirror: /graphify prompt in .github/prompts/. -->
-Build or refresh the project knowledge graph, then answer codebase questions via
-targeted queries instead of grepping or pasting full files.
+<!-- Reference skill — auto-routes on architecture/cross-file tasks. Pair with graphify claude install PreToolUse hook. Copilot: /graphify prompt. -->
+## Graph-first gate
+
+**If `graphify-out/GRAPH_REPORT.md` exists:**
+
+1. Run `graphify query "<question>"` (or read `GRAPH_REPORT.md` for broad orientation)
+2. Use `graphify path` / `graphify explain` for precise hops
+3. **Read source only for gaps** — exact lines, implementation detail the graph lacks
+
+**If no graph:** run `graphify extract .` or fall back to normal Read/Grep. Do not block the task.
+
+Full when-to-use / when-not: [when-to-use.md](when-to-use.md)
 
 ## Build or refresh
 
 ```bash
-graphify extract .              # full build (code-only, offline for TS/JS)
-graphify update .               # incremental after edits
-graphify stats                  # verify graph exists
+graphify stats                  # sanity check before big architecture questions
+graphify extract .              # once at setup (or --force if graph is broken)
+graphify hook install           # recommended — AST rebuild on commit
+graphify update .               # after git pull if hooks off, or graph may be stale
 ```
 
-Outputs land in `graphify-out/`:
-- `GRAPH_REPORT.md` — one-page summary (god nodes, communities, suggested questions)
-- `graph.json` — full graph for CLI queries
+Default: hooks keep the graph fresh — do not re-extract every session. See `guide/GRAPHIFY_GUIDE.md` § Update strategy.
 
-## Query before reading source
-
-Prefer these over Glob/Grep/Read when exploring architecture:
+## Query commands
 
 ```bash
+graphify query "how do API routes reach the database?"
 graphify query "layer dependencies"
-graphify query "what connects the API to the database?"
 graphify path "SymbolA" "SymbolB"
 graphify explain "SymbolName"
 ```
 
-Read `graphify-out/GRAPH_REPORT.md` for broad orientation; use `graphify query`
-for precise, hop-by-hop detail.
-
-## When to rebuild
-
-- After structural changes (new modules, moved files, renamed layers)
-- After `git pull` with significant diffs — run `graphify update .`
-- Optional: `graphify hook install` auto-rebuilds on commit (AST-only, no API cost)
-
-See `guide/GRAPHIFY_GUIDE.md` for daily usage beyond harness setup.
+Daily reference: `guide/GRAPHIFY_GUIDE.md`

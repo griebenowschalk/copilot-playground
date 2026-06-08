@@ -42,7 +42,7 @@ Read AGENTS.md first. Load detailed rules on demand via the routing table below.
 ## Rule Routing Table (READ ON DEMAND)
 | If the task involves...          | Read this file                                |
 |----------------------------------|-----------------------------------------------|
-| Architecture, codebase structure *(Graphify only)* | graphify-out/GRAPH_REPORT.md or `/graphify query` |
+| Architecture, cross-layer flows, refactors, "who calls what" *(Graphify only)* | `.claude/skills/graphify/SKILL.md` or `/graphify` |
 | React components / UI            | .github/instructions/frontend.instructions.md |
 | Schema, migrations, repositories | .github/instructions/database.instructions.md |
 | API route handlers               | .github/instructions/api.instructions.md      |
@@ -50,7 +50,7 @@ Read AGENTS.md first. Load detailed rules on demand via the routing table below.
 | Anything touching input/secrets  | .github/instructions/security.instructions.md |
 
 ## Where the rest lives
-- Code graph *(Graphify only)*: `graphify-out/GRAPH_REPORT.md`
+- Code graph *(Graphify only)*: `.claude/skills/graphify/` — query before multi-file reads; PreToolUse hook from `graphify claude install`
 - Skills: `.claude/skills/<name>/SKILL.md`
 - Legacy commands: `.claude/commands/*.md`
 - Subagents: `.claude/agents/*.md`

@@ -68,10 +68,11 @@ Then re-run the AI-DLC prompt above.
 **If Graphify was enabled at Phase 0.5**, also expect:
 
 - `.graphifyignore` + `graphify-out/` — codebase graph (output gitignored)
-- `.claude/skills/graphify/SKILL.md` — Claude `/graphify` skill
+- `.claude/skills/graphify/SKILL.md` + `when-to-use.md` — graph-first gate skill
 - `.github/prompts/graphify.prompt.md` — Copilot `/graphify` prompt
-- Graphify section in `AGENTS.md` + architecture row in `CLAUDE.md`
-- PreToolUse hook from Graphify merged into `.claude/settings.json`
+- Short Graphify line in `AGENTS.md` + skill routing row in `CLAUDE.md`
+- PreToolUse hook from `graphify claude install` merged into `.claude/settings.json`
+- `graphify hook install` (recommended) — AST graph rebuild on commit
 
 **After full harness (guide extensions + manual steps):**
 

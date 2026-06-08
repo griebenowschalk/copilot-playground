@@ -8,7 +8,7 @@ the SAME files Copilot loads via `applyTo` globs — one source of truth.
 ## Rule Routing Table (READ ON DEMAND)
 | If the task involves...          | Read this file                                |
 |----------------------------------|-----------------------------------------------|
-| Architecture, codebase structure | graphify-out/GRAPH_REPORT.md or `/graphify query` |
+| Architecture, cross-layer flows, refactors, "who calls what" | `.claude/skills/graphify/SKILL.md` or `/graphify` |
 | React components / UI            | .github/instructions/frontend.instructions.md |
 | Schema, migrations, repositories | .github/instructions/database.instructions.md |
 | API route handlers               | .github/instructions/api.instructions.md      |
@@ -18,7 +18,7 @@ the SAME files Copilot loads via `applyTo` globs — one source of truth.
 Security applies to everything; read every file a task touches.
 
 ## Where the rest lives
-- Code graph: `graphify-out/GRAPH_REPORT.md` — build with `/graphify .` or `graphify extract .`
+- Code graph *(Graphify only)*: `.claude/skills/graphify/` — query before multi-file reads; PreToolUse hook from `graphify claude install`
 - Skills: `.claude/skills/<name>/SKILL.md`  (e.g. /graphify, /figma, /review)
 - Legacy commands: `.claude/commands/*.md`  (e.g. /ship)
 - Subagents: `.claude/agents/*.md`

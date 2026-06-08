@@ -14,6 +14,4 @@ Replace the placeholders below with your real project.
 - Named exports only. Validate all input. Mirror the linter.
 
 ## Code graph (Graphify)
-For architecture or cross-file questions, read `graphify-out/GRAPH_REPORT.md` or run
-`graphify query "..."` before opening multiple source files. Rebuild after structural
-changes: `graphify update .`. Copilot: type `/graphify` in chat.
+For cross-file architecture questions, use the graph (`/graphify` or `graphify query`) before opening multiple source files. Details in `.claude/skills/graphify/`. Rebuild: `graphify update .`.

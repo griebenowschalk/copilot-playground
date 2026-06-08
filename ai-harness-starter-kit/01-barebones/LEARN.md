@@ -48,7 +48,8 @@ graphify-out/                     generated knowledge graph (gitignored; rebuild
   settings.local.json             personal overrides (gitignored)
   commands/ship.md                legacy command (still works) — /ship
   skills/                         skills = richer commands (can bundle scripts)
-    graphify/SKILL.md               /graphify — codebase knowledge graph
+    graphify/SKILL.md               /graphify — graph-first gate + queries
+    graphify/when-to-use.md         when to query vs read source (linked from skill)
     figma/SKILL.md                  /figma
     figma/scripts/fetch-context.sh  ← script the skill runs; reads FIGMA_API_KEY
     review/SKILL.md                 /review  (mirrors the Copilot prompt)
@@ -67,7 +68,7 @@ graphify-out/                     generated knowledge graph (gitignored; rebuild
 | Mode | Claude | Copilot |
 |---|---|---|
 | Always-on | AGENTS.md + CLAUDE.md + PreToolUse graph hook | copilot-instructions.md + AGENTS.md |
-| Code discovery | `/graphify query` + GRAPH_REPORT.md | `/graphify` prompt + GRAPH_REPORT.md + `graphify query` |
+| Code discovery | PreToolUse hook + `graphify` skill + `/graphify` | `/graphify` prompt + `graphify query` |
 | By file path (glob) | router can use it | instructions/* applyTo |
 | By task intent | CLAUDE.md routing table | — (Copilot can't) |
 | Manual command | skills/ + commands/ | prompts/ |

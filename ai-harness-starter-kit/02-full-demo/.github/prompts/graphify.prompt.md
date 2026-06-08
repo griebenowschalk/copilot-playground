@@ -1,15 +1,33 @@
 ---
 mode: agent
-description: Query the codebase knowledge graph for architecture and flow questions
+description: Query the codebase knowledge graph — architecture, cross-layer flows, refactors, dependency tracing
 ---
 <!-- Copilot manual command. Run with /graphify in Copilot Chat. -->
-For architecture, data flow, or "how does X connect to Y" questions:
+## Graph-first gate
 
-1. If `graphify-out/GRAPH_REPORT.md` exists, read it first for orientation.
-2. Run targeted queries via terminal: `graphify query "<question>"`
-3. Use `graphify path "SymbolA" "SymbolB"` or `graphify explain "SymbolName"` for precise hops.
+**If `graphify-out/GRAPH_REPORT.md` exists:**
 
-Do NOT read or paste multiple source files when the graph can answer. Read individual
-files only for gaps the query missed.
+1. Read `GRAPH_REPORT.md` for orientation **or** run `graphify query "<question>"`
+2. Use `graphify path` / `graphify explain` for precise hops
+3. Read source files **only** for gaps (exact lines, implementation detail)
 
-If no graph exists yet, tell the user to run `graphify extract .` from the project root.
+**If no graph:** tell the user to run `graphify extract .` — then use normal discovery.
+
+## Use graph-first for
+
+- Cross-layer flows (API → service → repo → DB)
+- Architecture / onboarding / multi-module refactors
+- "Who calls what" debugging
+
+## Do not force for
+
+- Single-file edits when scoped instructions already apply
+- Stale/missing graph — run `graphify update .` first or read source
+- Exact line-level text the graph cannot provide
+- Tiny repos where one Read is cheaper
+
+```bash
+graphify query "<your question>"
+graphify path "SymbolA" "SymbolB"
+graphify explain "SymbolName"
+```

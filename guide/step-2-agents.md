@@ -8,10 +8,10 @@ With `CLAUDE.md` in place, create `AGENTS.md` as the **shared baseline** Copilot
 
 ```markdown
 ## Code graph (Graphify)
-For architecture or cross-file questions, read `graphify-out/GRAPH_REPORT.md` or run
-`graphify query "..."` before opening multiple source files. Rebuild after structural
-changes: `graphify update .`. Copilot: type `/graphify` in chat. Claude: `/graphify query`.
+For cross-file architecture questions, use the graph (`/graphify` or `graphify query`) before opening multiple source files. Details in `.claude/skills/graphify/`. Rebuild: `graphify update .`.
 ```
+
+Keep this **one short paragraph** — the PreToolUse hook and `graphify` skill carry the graph-first workflow; do not expand `AGENTS.md` with query gates or when-to-use tables.
 
 And add `.github/prompts/graphify.prompt.md` for Copilot:
 
