@@ -93,7 +93,7 @@ merge the PreToolUse hook per [`step-3-claude-folder.md`](step-3-claude-folder.m
 | `.claude/skills/graphify/SKILL.md` | Claude `/graphify` skill |
 | `.github/prompts/graphify.prompt.md` | Copilot `/graphify` prompt |
 
-`graphify-out/` is gitignored — rebuild locally after clone.
+`graphify-out/` should be **gitignored** — Graphify does not add the entry for you, so add `graphify-out/` to `.gitignore` at setup (see `step-0.5-graphify.md` §0.5.2). It's a local cache — rebuild after clone with `graphify extract .`.
 
 **Reading `GRAPH_REPORT.md`:**
 - **God nodes** are connectivity counts, not domain importance — config files (`tsconfig.json`'s `compilerOptions`, `package.json`'s `scripts`) often outrank real domain hubs (route handlers, core services) simply by edge count. Skim past config-file entries to find the domain hubs further down the list; consider adding noisy config files to `.graphifyignore` if they consistently crowd out useful signal.

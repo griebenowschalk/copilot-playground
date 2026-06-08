@@ -95,10 +95,28 @@ graphify extract .
 graphify install --project
 graphify claude install --project    # required — PreToolUse hook nudges graph before Glob/Grep/Read
 graphify vscode install --project
-graphify hook install                # recommended — AST-only rebuild on commit (no API cost)
+graphify hook install                # commit-rebuild hook — ONLY if setup root == git root (see below)
 ```
 
 Verify hooks: `graphify hook status`
+
+> **⚠ `graphify hook install` is git-repo-scoped, not folder-scoped.** It writes `post-commit` / `post-checkout` into the repo's single `.git/hooks/`, and git runs them from the **git root** (top of the working tree) using the relative path `graphify-out`. So the rebuild always targets the **git root**, regardless of which folder you ran setup in.
+>
+> **Before running it, check the setup root is the git root:**
+>
+> ```bash
+> [ "$(git rev-parse --show-toplevel)" = "$PWD" ] && echo "git root — safe to install hook" || echo "SUBDIR — skip hook install"
+> ```
+>
+> If the harness target is a **subdirectory** of a larger repo (e.g. setting up `packages/api` or a demo project inside a monorepo), **skip `graphify hook install`** — otherwise it rebuilds (and creates a stray `graphify-out/`) at the git root on every commit. Refresh that subproject's graph manually instead with `graphify update .` (see 0.5.4). Only install the hook when the project root and the git root are the same directory.
+
+**Keep graph output out of git.** `graphify extract` writes `graphify-out/` to the project root, but Graphify does **not** add it to `.gitignore` for you. Add it yourself so it never lands in version control (create a `.gitignore` if the repo has none):
+
+```gitignore
+graphify-out/
+```
+
+This is separate from the `.graphifyignore` entry in 0.5.1: `.graphifyignore` stops Graphify from graphing its own output; `.gitignore` stops git from tracking it. You need both. The graph is a local cache — teammates rebuild it after clone with `graphify extract .`.
 
 > **Known quirk:** `graphify install --project` may also drop a stray `.claude/CLAUDE.md` containing just the skill-routing line (e.g. `# graphify` + a `.claude/skills/graphify/SKILL.md` pointer). Claude Code does **not** auto-load `CLAUDE.md` from inside `.claude/` — only the root `CLAUDE.md` (and any `CLAUDE.md` in the directory you're working in) — so that file would sit unused. Fold its routing line into the root `CLAUDE.md` (as a routing row, see `step-1-claude.md`), then force-delete the stray file: `rm -f .claude/CLAUDE.md`.
 
@@ -155,6 +173,6 @@ Do **not** run `graphify extract .` every session — use `update` incrementally
 ---
 
 > **AI-DLC checkpoint — Phase 0.5**
-> **Ask:** *"Enable Graphify for this project?"* — and size the recommendation to the codebase: Graphify's payoff (structured call-chain answers replacing multi-file reads) scales with codebase size and interconnectedness, while setup (extract, install × 3, hook install) and the always-on PreToolUse hook are **fixed costs** paid regardless of size. On a small or shallow codebase (rough heuristic: a couple dozen files, 1–2 hop call chains), reading the handful of relevant files directly is often just as fast — lean toward `/init` there. On larger, more interconnected codebases, lean toward enabling. If **no**, skip to Phase 1 (`step-1-claude.md`) with `/init`. If **yes**, run **0.5.0 check-and-install**: preflight → install if missing → re-verify. Only run **0.5.1–0.5.4** when `graphify --version` succeeds — include **`graphify hook install`** (recommended). If install fails or human skips, continue to Phase 1 with `/init`.
+> **Ask:** *"Enable Graphify for this project?"* — and size the recommendation to the codebase: Graphify's payoff (structured call-chain answers replacing multi-file reads) scales with codebase size and interconnectedness, while setup (extract, install × 3, hook install) and the always-on PreToolUse hook are **fixed costs** paid regardless of size. On a small or shallow codebase (rough heuristic: a couple dozen files, 1–2 hop call chains), reading the handful of relevant files directly is often just as fast — lean toward `/init` there. On larger, more interconnected codebases, lean toward enabling. If **no**, skip to Phase 1 (`step-1-claude.md`) with `/init`. If **yes**, run **0.5.0 check-and-install**: preflight → install if missing → re-verify. Only run **0.5.1–0.5.4** when `graphify --version` succeeds. **Run `graphify hook install` only if the setup root is the git root** (0.5.2) — skip it for a subdirectory/monorepo-package setup, or it rebuilds a stray `graphify-out/` at the git root on every commit. Always add `graphify-out/` to `.gitignore` (0.5.2). If install fails or human skips, continue to Phase 1 with `/init`.
 
 **Next:** `step-1-claude.md`
