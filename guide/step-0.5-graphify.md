@@ -68,23 +68,115 @@ If the facilitator cannot run brew/uv (sandbox, permissions), print the exact co
 
 ## 0.5.1 Add `.graphifyignore`
 
-Exclude build artifacts **and markdown docs** from the graph. Graphify treats `.md` files as documents and runs **LLM semantic extraction** on them (requires an API key and adds harness/setup prose you usually do not want in a code graph). Prefer a **code-only** graph via tree-sitter (offline, no API key for TS/Prisma).
-
-Example for Next.js + Prisma apps:
+Exclude build artifacts, lock files, and all non-code files from the graph. Graphify uses **tree-sitter** for code files (offline, no API key) but falls back to **LLM semantic extraction** for anything tree-sitter can't parse — markdown, YAML, HTML, shell scripts, etc. That fallback requires an API key and burns tokens on content that adds no graph signal. The template below is the recommended default for most repos; trim or extend as needed.
 
 ```
+# ── Build outputs (all major frameworks) ──────────────────────────
 node_modules/
 .next/
 out/
-*.db
+dist/
+build/
+.svelte-kit/
+.nuxt/
+.output/
+.turbo/
+.vercel/
+storybook-static/
+__pycache__/
+.tox/
+venv/
+.venv/
+
+# ── Generated & cache ─────────────────────────────────────────────
 src/generated/
 graphify-out/
+coverage/
+.cache/
+.nyc_output/
+**/__snapshots__/
 
-README.md
+# ── Lock files (large, zero signal for the graph) ─────────────────
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+bun.lockb
+*.lock
+
+# ── Non-code files that trigger LLM extraction ────────────────────
+# tree-sitter can't parse these — Graphify falls back to LLM,
+# which requires an API key and adds no useful code-graph signal.
+*.md
+**/*.md
+*.txt
+**/*.txt
+*.html
+*.xml
+*.yaml
+*.yml
+*.sh
+Dockerfile
 docs/
+guide/
+*.log
+logs/
+
+# ── Media / binary (no code signal) ───────────────────────────────
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.webp
+*.svg
+*.mp4
+*.mov
+*.mp3
+*.wav
+*.ttf
+*.woff
+*.woff2
+*.eot
+*.otf
+*.zip
+*.tar.gz
+*.gz
+*.tgz
+*.pdf
+
+# ── Data files ────────────────────────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+*.csv
+
+# ── IDE / CI / test infra ─────────────────────────────────────────
+.idea/
+.github/
+e2e/
+playwright/
+cypress/
+
+# ── Env files ─────────────────────────────────────────────────────
+.env
+.env.*
+
+# ── Common top-level non-code dirs (add repo-specific ones below) ──
+static/
+public/
+icons/
 ```
 
-Add other root markdown as needed (`AGENTS.md`, `CLAUDE.md`, …) or use `*.md` if the repo has no source markdown you need in the graph.
+**Repo-specific additions to consider:**
+
+| Pattern | Add when… |
+|---------|-----------|
+| `*.stories.tsx` | Storybook files in `src/` |
+| `prisma/migrations/` | Migration SQL files (schema is enough for the graph) |
+| `scripts/` | Shell/infra scripts not part of the call graph |
+| `packages/<name>/` | Monorepo packages you're not graphing this run |
+
+After writing the file, run `graphify extract .` and verify output in `graphify-out/GRAPH_REPORT.md` — if node/community counts look unreasonably high, a non-code directory is likely still included.
 
 ---
 
