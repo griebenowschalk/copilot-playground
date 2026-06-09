@@ -122,7 +122,7 @@ graphify-out/ missing?
             │        need accurate graph before your next commit
             └─ no  → git pull or end of day → graphify update .
 
-graph looks wrong? (graphify stats — node count dropped, stale answers)
+graph looks wrong? (GRAPH_REPORT.md node/community counts dropped, stale answers)
   └─ graphify update . first
   └─ still wrong → graphify extract . --force
 
@@ -139,7 +139,7 @@ big refactor / changed .graphifyignore?
 | `graphify update .` | After `git pull` without hooks, or before architecture work if graph may be stale |
 | `graphify update . --no-cluster` | Faster incremental refresh; skip community clustering |
 | `graphify extract . --force` | Graph shrunk, wrong, or huge structural change |
-| `graphify stats` | Sanity check before a big architecture session |
+| `ls graphify-out/graph.json` | Confirm the graph exists before a big architecture session |
 
 **Avoid:** `graphify extract .` every session — full re-parse is wasteful when `update` or git hooks suffice.
 
@@ -150,7 +150,7 @@ cd <target-repo-root>       # the project workspace root
 graphify extract .          # once at setup
 graphify hook install       # recommended
 graphify update .           # incremental when hooks are off or after pull
-graphify stats              # verify graph health
+ls graphify-out/graph.json  # verify the graph exists
 ```
 
 ## Query commands
@@ -193,7 +193,7 @@ graphify update .           # only if hooks off, or pull had big structural chan
 
 **During work:** `/graphify query` (Claude) or `/graphify` (Copilot) before pasting multiple files.
 
-**Structural changes** (new modules, moved files): hook handles on commit; if hooks off, `graphify update .`. Full `extract . --force` only if `graphify stats` looks wrong.
+**Structural changes** (new modules, moved files): hook handles on commit; if hooks off, `graphify update .`. Full `extract . --force` only if `GRAPH_REPORT.md` counts look wrong.
 
 ## Token tip
 

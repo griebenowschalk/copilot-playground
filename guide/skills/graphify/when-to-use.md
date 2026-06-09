@@ -30,7 +30,7 @@ a real symbol name — don't retry synonyms of the same abstract phrase.
 | Situation | Why |
 |-----------|-----|
 | Editing one file with scoped instructions already loaded | Instructions + that file are enough |
-| `graphify-out/` missing or `graphify stats` fails | No graph — use normal discovery; offer `graphify extract .` |
+| `graphify-out/graph.json` missing | No graph — use normal discovery; offer `graphify extract .` |
 | Graph likely stale (large refactor since last extract) | Run `graphify update .` first, or read source if urgent |
 | Need exact line-level text | Graph shows relationships, not full source |
 | Tiny change in a known file | One `Read` is cheaper than query + follow-up reads |
@@ -45,6 +45,6 @@ Recommended setup: `graphify hook install` once — AST-only rebuild on commit (
 | Hooks active, normal edits | Nothing — hook rebuilds on commit |
 | `git pull`, hooks active | Usually nothing; `graphify update .` only if you need graph before next commit |
 | `git pull`, no hooks | `graphify update .` |
-| Graph stale / wrong (`graphify stats`) | `graphify update .` → then `graphify extract . --force` if still off |
+| Graph stale / wrong (`GRAPH_REPORT.md` counts look off) | `graphify update .` → then `graphify extract . --force` if still off |
 | Huge refactor | `graphify extract . --force` |
 </content>

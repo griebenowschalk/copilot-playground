@@ -89,7 +89,8 @@ Same discipline as context docs (Step 4) and skills (§6.5):
 > Stop. Propose the instruction-file list inferred from Phase 1 discovery (one per layer
 > with distinct rules, plus `security`). Ask the human to confirm, trim, or add. If they
 > defer, generate from the repo tree — only domains with evidence in the codebase. Show
-> one sample instruction file for approval before writing the set. Then reconcile the
+> **exactly one** sample instruction file for approval before writing the set — do **not**
+> paste all of them into chat (that duplicates every file in the transcript). Then reconcile the
 > `CLAUDE.md` routing rows (Step 1) so every row points at a file that now exists.
 
 ---

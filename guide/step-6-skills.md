@@ -183,6 +183,8 @@ Skills are auto-discovered from `.claude/skills/` — there's no routing table t
 1. **Restart if needed** — a brand-new `.claude/skills/` directory needs a session restart before Claude watches it; edits to existing skill files take effect live.
 2. **Verify routing** — ask a question that matches each skill's `description` (e.g. "what's our approach to X?") and confirm Claude loads it, or invoke directly with `/<name>`.
 
+**Looking for more skills?** Browse [skills.sh](https://www.skills.sh/) — a community directory of ready-made Claude Code skills you can drop into `.claude/skills/`.
+
 **End of documented steps.** Scoped instructions (Step 2.5) and Copilot parity —
 `.github/copilot-instructions.md` (Step 1), chat modes (Step 3), `.vscode/mcp.json`
 (Step 5), and `.github/prompts/` (§6.5) — are now part of the documented flow. Add

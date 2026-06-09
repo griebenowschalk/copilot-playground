@@ -232,7 +232,7 @@ CLI alternatives: `claude mcp list` and `claude mcp status <name>`.
 ---
 
 > **AI-DLC checkpoint — Phase 5**
-> Stop. Ask: **frontend project with Figma designs?** (yes → append `figma` server + `FIGMA_API_KEY` to `.env.example`; no → baseline only).
+> Stop. **If the Phase 0 questionnaire already answered the Figma gate, apply it.** Otherwise ask: **frontend project with Figma designs?** (yes → append `figma` server + `FIGMA_API_KEY` to `.env.example`; no → baseline only).
 > Show draft `.mcp.json`, the parity `.vscode/mcp.json` (§5.4), `.env.example` (if Figma), gitignore additions, and `CLAUDE.md` MCP section for approval.
 > After write: verify with `/mcp` (Claude) and the Copilot Chat MCP list (VS Code). Do not hardcode API keys.
 

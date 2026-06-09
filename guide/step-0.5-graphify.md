@@ -129,18 +129,20 @@ This is separate from the `.graphifyignore` entry in 0.5.1: `.graphifyignore` st
 - CLAUDE.md graphify routing row + PreToolUse hook (via `graphify claude install --project`)
 - Short Graphify line in `AGENTS.md` (via `graphify vscode install` — merge in Step 2; keep minimal)
 
-Verify: `graphify stats`
+Verify: `ls graphify-out/graph.json` (and skim `graphify-out/GRAPH_REPORT.md`)
 
 ---
 
 ## 0.5.3 Graph-first skill *(Graphify only)*
 
-`graphify install --project` may create a minimal skill — **replace or merge** with the harness template at [`skills/graphify/`](skills/graphify/) in this guide folder (copy to `.claude/skills/graphify/` in the target repo):
+`graphify install --project` writes its own multi-hundred-line pipeline `SKILL.md` — **replace or merge** with the harness template at [`skills/graphify/`](skills/graphify/) in this guide folder (copy to `.claude/skills/graphify/` in the target repo):
 
 | File | Role |
 |------|------|
 | `SKILL.md` | Graph-first gate, query commands, `description` tuned for auto-routing on architecture/cross-file tasks |
 | `when-to-use.md` | When to query vs when to read source (progressive disclosure — not loaded unless linked) |
+
+> **AI-DLC — don't read the auto-installed `SKILL.md` to overwrite it.** It is the full graphify pipeline skill (~600 lines), and an agent's Write-over-existing-file requires a prior Read — so overwriting it pulls all ~600 lines into context for nothing (you discard them on write). In the default **replace** case, `rm -f .claude/skills/graphify/SKILL.md` first, then write the template as a net-new file (no Read needed). Same pattern as the stray `.claude/CLAUDE.md` deletion above. Only Read it when you genuinely need to **merge** project-specific query examples the template lacks.
 
 **Do not** paste the full graph-first workflow into `AGENTS.md` — the hook + skill carry that behavior; `AGENTS.md` stays one short line (Step 2).
 
@@ -165,7 +167,7 @@ Default playbook — full detail in `GRAPHIFY_GUIDE.md` § Update strategy:
 | `git pull` (hooks on) | Usually nothing — hook rebuilds on next commit; run `graphify update .` if you need the graph **before** committing |
 | `git pull` (no hooks) | `graphify update .` |
 | Normal day (hooks on) | Nothing — query freely |
-| Big refactor / graph looks wrong (`graphify stats`) | `graphify update .` first; then `graphify extract . --force` if still stale |
+| Big refactor / graph looks wrong (`GRAPH_REPORT.md` counts look off) | `graphify update .` first; then `graphify extract . --force` if still stale |
 | Fast refresh, skip clustering | `graphify update . --no-cluster` |
 
 Do **not** run `graphify extract .` every session — use `update` incrementally; full extract is the exception.

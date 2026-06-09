@@ -17,6 +17,7 @@ All harness rollout documentation lives in this folder. Copy the whole **`guide/
 | `agents/docs-explorer.md` | Copyable subagent template referenced from §3.3 — install in `.claude/agents/` |
 | `chatmodes/docs-explorer.chatmode.md` | Copyable Copilot chat-mode template referenced from §3.3 — install in `.github/chatmodes/` |
 | `skills/graphify/` | Copyable Graphify skill template (`SKILL.md` + `when-to-use.md`) referenced from Step 0.5 §0.5.3 and §6.4 — install in `.claude/skills/graphify/` |
+| `scripts/reset-harness.sh` | Utility — remove all generated harness artifacts from a **target repo** so you can re-run setup clean. App code untouched. See "Resetting the harness" below. |
 | `step-4-context-docs.md` | `docs/context/` reference docs |
 | `step-5-mcp.md` | MCP servers (`.mcp.json` + `.vscode/mcp.json`) |
 | `step-6-skills.md` | Project skills (`.claude/skills/<name>/SKILL.md`) + Copilot prompts (`.github/prompts/`) |
@@ -36,3 +37,19 @@ All harness rollout documentation lives in this folder. Copy the whole **`guide/
 | 6 | Skills | `step-6-skills.md` | `.claude/skills/<name>/SKILL.md` (staple + codebase-specific) + `.github/prompts/*.prompt.md` |
 
 **AI-DLC:** load `HARNESS_SETUP_GUIDE.md` plus **only the current step file** for the active phase. On a **large repo or monorepo**, also read `large-codebases.md` — it covers per-package scoping and splitting the run across fresh context windows at phase gates.
+
+## Resetting the harness
+
+To wipe the generated harness from a target repo and start over, run `scripts/reset-harness.sh` with the **target directory** as the first argument — it works on any folder, not just the one it lives in:
+
+```bash
+./guide/scripts/reset-harness.sh <target-dir> [--dry-run] [-y|--yes]
+
+# Preview what would be removed:
+./guide/scripts/reset-harness.sh ai-harness-starter-kit/03-dummy-project --dry-run
+
+# Actually reset (prompts for confirmation; add -y to skip):
+./guide/scripts/reset-harness.sh ai-harness-starter-kit/03-dummy-project
+```
+
+It removes only the named harness artifacts (`AGENTS.md`, `CLAUDE.md`, `.mcp.json`, `.github/`, `.vscode/`, `.claude/`, `docs/`, `graphify-out/`, `.graphifyignore`, the per-run `guide/.harness-progress.md` ledger, and harness `.env`) and restores `.env.example` / `.gitignore` from git if the target is a work tree. **Application code is never touched.** If `.env` was removed, run `pnpm setup` (or your project's equivalent) to restore it.

@@ -26,7 +26,7 @@ Full when-to-use / when-not: [when-to-use.md](when-to-use.md)
 ## Build or refresh
 
 ```bash
-graphify stats                  # sanity check before big architecture questions
+ls graphify-out/graph.json      # confirm the graph exists before big architecture questions
 graphify extract .              # once at setup (or --force if graph is broken)
 graphify hook install           # recommended — AST rebuild on commit
 graphify update .               # after git pull if hooks off, or graph may be stale
@@ -43,5 +43,5 @@ graphify path "SymbolA" "SymbolB"
 graphify explain "SymbolName"
 ```
 
-**Phrase around concrete symbols that exist as graph nodes** (a route handler, function, or class name from `GRAPH_REPORT.md` or `graphify stats`), not abstract architecture terms (`"layer dependencies"`, `"architecture boundaries"`). Matching is keyword/BFS-based, not semantic — abstract phrasings often return "No matching nodes" or hit unrelated config strings (e.g. `"dependencies"` matching `package.json`), wasting a round-trip. If a query misses, look up a real symbol name and reformulate around it rather than retrying synonyms.
+**Phrase around concrete symbols that exist as graph nodes** (a route handler, function, or class name from `GRAPH_REPORT.md`), not abstract architecture terms (`"layer dependencies"`, `"architecture boundaries"`). Matching is keyword/BFS-based, not semantic — abstract phrasings often return "No matching nodes" or hit unrelated config strings (e.g. `"dependencies"` matching `package.json`), wasting a round-trip. If a query misses, look up a real symbol name and reformulate around it rather than retrying synonyms.
 </content>

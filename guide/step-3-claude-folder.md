@@ -46,7 +46,7 @@ Hooks add latency on every match, so treat them like CI steps — small, fast, a
 Start with one `PostToolUse` lint-after-edit hook. Add `PreToolUse` guards and a `Stop` test runner once the basics are stable.
 
 > **AI-DLC checkpoint — Phase 3**
-> Stop. Ask which hooks to enable (PostToolUse lint, Stop test gate, permission denies). If the human defers, apply minimal PostToolUse lint + standard permission denies; omit Stop unless they opt in.
+> Stop. **If the Phase 0 policy questionnaire already captured hooks and permissions, apply those answers — don't re-ask.** Otherwise ask which hooks to enable (PostToolUse lint, Stop test gate, permission denies). If the human defers, apply minimal PostToolUse lint + standard permission denies; omit Stop unless they opt in.
 
 ### Example
 
@@ -216,6 +216,6 @@ rule lives in `.github/copilot-instructions.md` and `AGENTS.md`, the same way th
 subagent rule lives in `CLAUDE.md`.
 
 > **AI-DLC checkpoint — Phase 3 (subagents)**
-> Stop. Ask: **which subagents should this repo have?** Offer any existing `.claude/agents/*.md` files as a baseline, and propose `docs-explorer` as the default if the human has no other candidates in mind. If the human defers, install `docs-explorer` only. For each subagent, also produce the matching **Copilot chat mode** (`.github/chatmodes/*.chatmode.md`) when Copilot parity is in scope. Show the draft agent file(s), chat-mode file(s), and `CLAUDE.md` Subagents section for approval before writing.
+> Stop. **If the Phase 0 questionnaire already answered the subagent set, apply it and skip ahead.** Otherwise ask: **which subagents should this repo have?** Offer any existing `.claude/agents/*.md` files as a baseline, and propose `docs-explorer` as the default if the human has no other candidates in mind. If the human defers, install `docs-explorer` only. For each subagent, also produce the matching **Copilot chat mode** (`.github/chatmodes/*.chatmode.md`) when Copilot parity is in scope. Show the draft agent file(s), chat-mode file(s), and `CLAUDE.md` Subagents section for approval before writing.
 
 **Next:** `step-4-context-docs.md`
