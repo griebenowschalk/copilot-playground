@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
-# Reset the AI harness in a target repo: removes generated harness artifacts and
+# Reset the AI harness in a target repo: removes or restores harness artifacts and
 # leaves application code untouched. Run it from anywhere — pass the target dir.
+#
+# For each harness artifact:
+#   • git-tracked path  → restore to HEAD (removes harness additions, keeps original content)
+#   • untracked path    → delete (it was new — the harness created it)
+# Falls back to delete-only when the target is not a git work tree.
 #
 # Usage:   reset-harness.sh <target-dir> [--dry-run] [-y|--yes]
 # Example: ./guide/scripts/reset-harness.sh ai-harness-starter-kit/03-dummy-project
 #
-# --dry-run  list what would be removed, delete nothing
+# --dry-run  list what would be removed/restored, change nothing
 # -y|--yes   skip the confirmation prompt (for scripted use)
 set -euo pipefail
 
@@ -29,60 +34,82 @@ done
 ROOT="$(cd "$TARGET" && pwd)"
 cd "$ROOT"
 
+# Detect git work tree once — used by smart_remove to choose restore vs delete
+IN_GIT=0
+git rev-parse --is-inside-work-tree >/dev/null 2>&1 && IN_GIT=1
+
 echo "Harness reset target: $ROOT"
-[[ $DRY_RUN == 1 ]] && echo "(dry run — nothing will be deleted)"
+[[ $DRY_RUN == 1 ]] && echo "(dry run — nothing will be changed)"
 if [[ $ASSUME_YES == 0 && $DRY_RUN == 0 ]]; then
-  read -r -p "Remove harness artifacts from this folder? [y/N] " reply
+  read -r -p "Reset harness artifacts in this folder? [y/N] " reply
   [[ "$reply" =~ ^[Yy]$ ]] || { echo "aborted."; exit 0; }
 fi
 
-remove() {
-  if [[ -e "$1" || -L "$1" ]]; then
-    if [[ $DRY_RUN == 1 ]]; then
-      echo "would remove $1"
-    else
-      rm -rf "$1"
-      echo "removed $1"
+# smart_remove <path>
+#   git-tracked → rm -rf then git checkout -- (restores pre-harness content, drops additions)
+#   untracked   → rm -rf (it was created by the harness)
+#   missing     → no-op
+smart_remove() {
+  local path="$1"
+  [[ -e "$path" || -L "$path" ]] || return 0  # nothing to do
+
+  if [[ $IN_GIT == 1 ]]; then
+    local tracked
+    tracked=$(git ls-files -- "$path" 2>/dev/null | head -1)
+    if [[ -n "$tracked" ]]; then
+      if [[ $DRY_RUN == 1 ]]; then
+        echo "would restore  $path  (git-tracked — revert to HEAD)"
+      else
+        rm -rf "$path"
+        git checkout -- "$path" 2>/dev/null || true
+        echo "restored  $path  (HEAD)"
+      fi
+      return 0
     fi
+  fi
+
+  # Not git-tracked (or not in a git repo) — the harness created this; delete it
+  if [[ $DRY_RUN == 1 ]]; then
+    echo "would remove   $path  (new — not in git)"
+  else
+    rm -rf "$path"
+    echo "removed   $path"
   fi
 }
 
-# Root — entry files + learn/demo docs (Steps 1–2)
-remove AGENTS.md
-remove CLAUDE.md
-remove DEMO.md
-remove LEARN.md
+# Root — entry files (Steps 1–2)
+smart_remove AGENTS.md
+smart_remove CLAUDE.md
+smart_remove DEMO.md
+smart_remove LEARN.md
 
-# Step 5 MCP — Claude servers (guide/step-5-mcp.md)
-remove .mcp.json
-remove .env   # may contain FIGMA_API_KEY; run `pnpm setup` to restore app .env
+# Step 5 MCP
+smart_remove .mcp.json
+smart_remove .env            # harness-created from .env.example; run `pnpm setup` to restore
 
-# .github/ — instructions, prompts, copilot-instructions.md, chatmodes
-remove .github
+# App files the harness may have modified — restore if tracked, skip if unchanged
+smart_remove .env.example
+smart_remove .gitignore
 
-# .vscode/ — Copilot MCP, settings, extensions
-remove .vscode
+# .github/ — copilot-instructions.md, instructions/, chatmodes/, prompts/
+smart_remove .github
 
-# .claude/ — settings, hooks, commands, skills, agents, memory.jsonl (memory MCP)
-remove .claude/memory.jsonl
-remove .claude
+# .vscode/ — mcp.json, settings.json
+smart_remove .vscode
+
+# .claude/ — settings.json, hooks/, commands/, skills/, agents/
+smart_remove .claude/memory.jsonl   # gitignored; delete before the dir sweep below
+smart_remove .claude
 
 # docs/ — context docs (Step 4)
-remove docs
+smart_remove docs
 
-# Graphify — knowledge graph output and ignore file (Step 0.5)
-remove graphify-out
-remove .graphifyignore
+# Graphify — graph output and ignore file (Step 0.5)
+smart_remove graphify-out
+smart_remove .graphifyignore
 
-# Per-run ledger (large-codebases.md) — gitignored, lives under guide/ inside the target
-remove guide/.harness-progress.md
-
-# Restore app files the harness may have modified (e.g. FIGMA_API_KEY in .env.example,
-# memory.jsonl in .gitignore) — only when the target is a git work tree.
-if [[ $DRY_RUN == 0 ]] && git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-  git checkout -- .env.example .gitignore 2>/dev/null || true
-  echo "restored .env.example and .gitignore from git (if changed)"
-fi
+# Per-run ledger — gitignored under guide/ inside the target
+smart_remove guide/.harness-progress.md
 
 echo "Harness reset complete — app code untouched."
-echo "If you removed .env, run: pnpm setup"
+[[ $DRY_RUN == 0 ]] && echo "If .env was removed, run: pnpm setup"
