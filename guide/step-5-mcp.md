@@ -134,7 +134,15 @@ FIGMA_API_KEY=""
    - [direnv](https://direnv.net/) with `.envrc` loading `.env`
    - Set `FIGMA_API_KEY` in your shell profile
 
-Step 3 hooks already deny `Read(./.env)` — keys stay out of the model context.
+Step 3 already keeps keys out of the model context on both tools: Claude denies
+`Read(./.env)` via `permissions`, and the Copilot side combines the shared
+`.claude/settings.json` hook with the `.vscode/settings.json` `chat.tools.terminal.autoApprove`
+deny on `.env` (Step 3 §3.4).
+
+**Using the Figma MCP to build:** once this server is connected, the streamlined
+design-to-code path is the **`figma-to-code` skill** (Claude) and its `figma.prompt.md`
+counterpart (Copilot) — both pull the frame via this server, map it to existing components,
+then build. See Step 6 §6.7.
 
 ---
 

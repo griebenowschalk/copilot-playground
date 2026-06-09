@@ -4,11 +4,13 @@
 
 Create a `.claude/` directory at your repo root for Claude Code–specific configuration. Commit `.claude/settings.json` so the team shares the same guardrails; keep personal overrides in `.claude/settings.local.json` (gitignored).
 
-> **Copilot parity note for this step.** Hooks and permissions (§3.1–§3.2) are a
-> **Claude-only enforcement layer** — GitHub Copilot has no equivalent and relies on
-> instruction files (`AGENTS.md`, `.github/instructions/`, `.github/copilot-instructions.md`)
-> for the same guardrails. Subagents (§3.3), by contrast, **do** have a Copilot
-> equivalent — custom **chat modes** — covered in §3.3 below.
+> **Copilot parity note for this step.** All three concerns in this step now have a
+> Copilot counterpart:
+> - **Hooks** (§3.1–§3.2) — VS Code Copilot reads the **same `.claude/settings.json` `hooks`
+>   block** (Preview), so one definition serves both tools. See §3.4.
+> - **Permissions** (§3.1) — Copilot uses VS Code's `chat.tools.*` auto-approve settings in
+>   `.vscode/settings.json` rather than Claude's `permissions` block. See §3.4.
+> - **Subagents** (§3.3) — mirrored by custom **chat modes**. See §3.3.
 
 | Path | Purpose |
 |------|---------|
@@ -127,7 +129,11 @@ Step 0.5 runs `graphify claude install --project`, which adds a **PreToolUse** h
 
 **Order:** Graphify install in Phase 0.5 first; write harness hooks in Phase 3 after, preserving PreToolUse.
 
-Copilot has no PreToolUse hook — it uses the Graphify section in `AGENTS.md`, `copilot-instructions.md`, and the `/graphify` prompt instead.
+Because VS Code Copilot reads the same `.claude/settings.json` `hooks` block (§3.4), it
+picks up this merged PreToolUse hook too — though it **ignores the matcher** and runs the
+hook on every tool call (Preview limitation). The Graphify section in `AGENTS.md`,
+`copilot-instructions.md`, and the `/graphify` prompt remain the primary, version-agnostic
+nudge for Copilot.
 
 ---
 
@@ -217,5 +223,69 @@ subagent rule lives in `CLAUDE.md`.
 
 > **AI-DLC checkpoint — Phase 3 (subagents)**
 > Stop. **If the Phase 0 questionnaire already answered the subagent set, apply it and skip ahead.** Otherwise ask: **which subagents should this repo have?** Offer any existing `.claude/agents/*.md` files as a baseline, and propose `docs-explorer` as the default if the human has no other candidates in mind. If the human defers, install `docs-explorer` only. For each subagent, also produce the matching **Copilot chat mode** (`.github/chatmodes/*.chatmode.md`) when Copilot parity is in scope. Show the draft agent file(s), chat-mode file(s), and `CLAUDE.md` Subagents section for approval before writing.
+
+---
+
+## 3.4 Copilot parity — permissions & hooks
+
+Hooks and permissions used to be Claude-only. They no longer are — but the two map to
+Copilot **differently**, so handle them separately. Only emit these when Copilot parity is
+in scope (Phase 0 questionnaire).
+
+### Hooks — shared, no duplication
+
+VS Code Copilot (Preview) **parses the `.claude/settings.json` `hooks` block directly**, so
+the hooks you wrote in §3.1–§3.2 already serve Copilot. Do **not** rewrite them — one
+definition, both tools. Known Preview caveats to flag for the team:
+
+| Difference | Impact |
+|------------|--------|
+| **Matchers are ignored** | A hook scoped to `"Edit\|Write"` runs on **every** tool call in Copilot. Keep hook scripts cheap and idempotent, or branch inside the script on the tool name from the event JSON. |
+| **Property casing** | Claude uses snake_case; VS Code uses camelCase. The shared `type`/`command`/`timeout` keys work in both. |
+| **Tool names differ** | If a script inspects the tool name, handle both vocabularies. |
+| **Preview** | Requires a recent VS Code + Copilot. Treat as additive, not a hard guarantee. |
+
+If you prefer to keep Copilot's hooks out of the Claude file, VS Code also auto-loads
+`.github/hooks/*.json` (same JSON shape) — but that duplicates config, so default to the
+shared `.claude/settings.json`.
+
+### Permissions — `.vscode/settings.json` auto-approve
+
+Copilot does **not** read Claude's `permissions` block. Its equivalent is VS Code's
+**terminal/tool auto-approval** in `.vscode/settings.json` — a regex-keyed map where `true`
+auto-approves and `false` denies (anything unmatched falls back to the normal confirmation
+prompt). Mirror the same allow/deny intent as the `permissions` block in §3.1:
+
+```jsonc
+// .vscode/settings.json — commit this so the team shares the same guardrails
+{
+  "chat.tools.terminal.autoApprove": {
+    "/^git\\s+(status|diff|log|show|add|commit)\\b/": true,
+    "/^npm\\s+(test|run\\s+(lint|build))\\b/": true,
+    "rm": false,
+    "rmdir": false,
+    "del": false,
+    "/\\.env\\b/": false
+  }
+}
+```
+
+| VS Code setting | Mirrors Claude… | Notes |
+|-----------------|-----------------|-------|
+| `chat.tools.terminal.autoApprove` | `permissions.allow` / `deny` for `Bash(...)` | Regex keys in `/…/`; `true` allow, `false` deny |
+| `chat.tools.edits.autoApprove` | `permissions.allow` for `Edit`/`Write` | Glob-based edit approval |
+| `chat.agent.networkFilter` | *(no direct Claude analog)* | Restricts which domains agent tools may reach (often org-managed) |
+
+`.env` protection: Claude denies the **Read tool** on `./.env*` via `permissions`; on the
+Copilot side the shared `.claude/settings.json` PreToolUse hook applies, and the
+`autoApprove` deny above blocks `cat .env`-style terminal reads. The file stays gitignored
+regardless (Step 5).
+
+> **AI-DLC checkpoint — Phase 3 (Copilot parity)**
+> Only if Copilot parity is in scope. Confirm the `.vscode/settings.json` auto-approve map
+> mirrors the same allow/deny intent as the §3.1 `permissions` block — don't invent new
+> rules. State plainly that hooks are **reused** from `.claude/settings.json` (Preview,
+> matchers ignored), so no second hooks file is written. Show the draft `.vscode/settings.json`
+> for approval before writing.
 
 **Next:** `step-4-context-docs.md`

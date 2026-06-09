@@ -14,7 +14,8 @@ intent, different mechanism for loading scoped rules.
 
 ## Claude ↔ Copilot parity
 
-Each Claude harness artifact has a Copilot counterpart (or an explicit "no equivalent"):
+Each Claude harness artifact now has a Copilot counterpart — some shared (same file), some
+mirrored (parallel file), one reused (VS Code Copilot reads Claude's hooks directly):
 
 | Concern | Claude | Copilot |
 |---------|--------|---------|
@@ -24,10 +25,15 @@ Each Claude harness artifact has a Copilot counterpart (or an explicit "no equiv
 | Specialist agents | `.claude/agents/*.md` subagents | `.github/chatmodes/*.chatmode.md` chat modes |
 | Reusable procedures | `.claude/skills/`, `.claude/commands/` | `.github/prompts/*.prompt.md` |
 | External tools (MCP) | `.mcp.json` (`mcpServers`, `${VAR}`) | `.vscode/mcp.json` (`servers`, `${input:…}`) |
-| Hooks / permissions | `.claude/settings.json` | *no equivalent — Copilot relies on instruction files* |
+| Hooks | `.claude/settings.json` (`hooks`) | reads the **same** `.claude/settings.json` hooks *(VS Code Preview; matchers ignored, runs on all tool calls)* — or `.github/hooks/*.json` |
+| Permissions | `.claude/settings.json` (`permissions` allow/deny) | `.vscode/settings.json` (`chat.tools.terminal.autoApprove`, `chat.tools.edits.autoApprove`, `chat.agent.networkFilter`) |
 
 The scoped rule files are **one source of truth**: Copilot loads them automatically by
-`applyTo` glob, Claude loads the same files on demand via its routing table.
+`applyTo` glob, Claude loads the same files on demand via its routing table. **Hooks are
+shared too** — VS Code Copilot parses the `.claude/settings.json` `hooks` block directly,
+so a single hooks definition serves both tools (see `step-3-claude-folder.md`). Only the
+**permissions** mechanism differs: Claude uses the `permissions` block; Copilot uses
+VS Code's `chat.tools.*` auto-approve settings in `.vscode/settings.json`.
 
 **Creation order (setup):** optionally build the graph (`step-0.5-graphify.md`), then
 create `CLAUDE.md` **and** `.github/copilot-instructions.md` from the same discovery

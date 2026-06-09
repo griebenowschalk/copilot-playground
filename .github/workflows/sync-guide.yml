@@ -1,0 +1,29 @@
+name: Sync guide to ai-dlc-harness
+
+on:
+  push:
+    branches: [main]
+    paths: ['guide/**']
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: griebenowschalk/ai-dlc-harness
+          token: ${{ secrets.GUIDE_SYNC_PAT }}
+          path: target
+
+      - run: |
+          rm -rf target/*
+          cp -r guide/* target/
+          cp guide/.gitignore target/ 2>/dev/null || true
+          cd target
+          git config user.email "bot@example.com"
+          git config user.name "Guide Sync Bot"
+          git add -A
+          git diff-index --quiet HEAD || git commit -m "Sync guide from copilot-playground"
+          git push

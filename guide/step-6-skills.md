@@ -142,9 +142,10 @@ Instructions for the workflow. Reference scoped rules by name
 | `${input:<id>}` | Prompts the user for an argument when the command runs (parity with skill `${input}` / args) |
 
 Mirror the demo prompts for shape: `review.prompt.md` (review the diff), `scaffold-component.prompt.md`
-(scaffold following `frontend.instructions.md`), `figma.prompt.md` (build from a Figma frame). A
-prompt should **point at** the instruction files rather than restating their rules — same
-no-duplication discipline as everywhere else.
+(scaffold following `frontend.instructions.md`). The **`figma.prompt.md`** (build from a Figma
+frame) is the Copilot counterpart of the `figma-to-code` skill — its content and gating live in
+**§6.7**. A prompt should **point at** the instruction files rather than restating their rules —
+same no-duplication discipline as everywhere else.
 
 **Already created:** `.github/prompts/graphify.prompt.md` exists if Graphify was enabled
 (Step 2 / Step 0.5) — don't recreate it here.
@@ -171,8 +172,49 @@ no-duplication discipline as everywhere else.
 
 ---
 
+## 6.7 Figma design-to-code *(only if Figma was opted in)*
+
+**Skip this section** if the Figma MCP server was not added in Step 5. When it was, install
+the streamlined design-to-code pairing so both tools build from a frame the same way:
+
+| Tool | Artifact | Role |
+|------|----------|------|
+| Claude | `.claude/skills/figma-to-code/SKILL.md` | Auto-routes on Figma/design requests; pulls the frame via the figma MCP, maps to existing components, builds per `frontend.instructions.md` |
+| Copilot | `.github/prompts/figma.prompt.md` | The `/figma` workflow — same flow, points at the same instruction files |
+
+Copy the template at [`skills/figma-to-code/`](skills/figma-to-code/) in this guide folder
+to `.claude/skills/figma-to-code/` in the target repo. It's a **task skill** (a workflow),
+but left model-invocable so a request like "build this Figma frame" auto-routes to it. The
+design payload from the figma MCP is large — the skill reads only the target node and notes
+that very large frames can set `context: fork` + `agent` to isolate the read.
+
+The Copilot `figma.prompt.md` is the parity. It **points at** the same instruction files
+rather than restating rules:
+
+```markdown
+---
+mode: agent
+description: Build or update UI from a Figma frame — maps the design to existing components, then implements.
+---
+Build the UI for the Figma node at ${input:figmaUrl:Figma frame/component URL or selection}.
+
+1. Read the design context via the **figma** MCP server (`.vscode/mcp.json`) — the target
+   node only, not the whole file.
+2. Map each layer to an existing component (reuse), one to extend, or a justified new
+   component. Map Figma styles to the codebase's existing tokens, not literal hex/px.
+3. Implement following `.github/instructions/frontend.instructions.md` and the project's
+   component conventions. Reuse before creating.
+4. Report the layer → component mapping and any deviations from the design.
+```
+
+Both artifacts must follow the **content rules in §6.6** and reuse existing components and
+tokens before creating new ones — pixel-cloning a frame into bespoke markup is the failure
+mode this pairing exists to prevent.
+
+---
+
 > **AI-DLC checkpoint — Phase 6**
-> Stop. Propose the staple skills (§6.2) plus a shortlist of codebase-specific skills (§6.3) inferred from Phase 1 discovery. **If Graphify was enabled (Step 0.5),** confirm the `graphify` skill from §6.4 — do not duplicate. Ask the human to confirm, trim, or add to the list. If they defer, generate the staples plus one skill per major framework/runtime actually found — skip categories with no evidence in the repo. For **Copilot parity (§6.5)**, convert each task/workflow skill to a `.github/prompts/*.prompt.md`; reference skills are already covered by Step 2.5 instruction files — don't duplicate. Show draft `SKILL.md` and any new prompt content before writing; every file must follow the content rules in §6.6.
+> Stop. Propose the staple skills (§6.2) plus a shortlist of codebase-specific skills (§6.3) inferred from Phase 1 discovery. **If Graphify was enabled (Step 0.5),** confirm the `graphify` skill from §6.4 — do not duplicate. **If Figma was opted in (Step 5),** install the `figma-to-code` skill + `figma.prompt.md` from §6.7. Ask the human to confirm, trim, or add to the list. If they defer, generate the staples plus one skill per major framework/runtime actually found — skip categories with no evidence in the repo. For **Copilot parity (§6.5)**, convert each task/workflow skill to a `.github/prompts/*.prompt.md`; reference skills are already covered by Step 2.5 instruction files — don't duplicate. Show draft `SKILL.md` and any new prompt content before writing; every file must follow the content rules in §6.6.
 
 ---
 

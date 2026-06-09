@@ -76,7 +76,7 @@ One row per phase: what to load, whether it scans, what to ask, and what to do i
 | 1 — Init | `step-1-claude.md` | Subagent scan / `/init` — reused after | Routing rows | Agent-generate from discovery |
 | 2 — Baseline | `step-2-agents.md` | Reuse Phase 1 | 3–6 non-negotiables | Propose from conventions; skip inapplicable categories |
 | 2.5 — Instructions | `step-2.5-instructions.md` | Reuse Phase 1 | Which scoped domains | One file per layer found + `security` (`applyTo: "**"`) |
-| 3 — Guardrails | `step-3-claude-folder.md` | Reuse Phase 1 | Hooks/permissions (§3.1) + subagents/chat modes (§3.3) | Minimal lint + denies; install `docs-explorer` agent + chat mode only |
+| 3 — Guardrails | `step-3-claude-folder.md` | Reuse Phase 1 | Hooks/permissions (§3.1) + subagents/chat modes (§3.3) + Copilot permission parity (§3.4) | Minimal lint + denies (mirror denies to `.vscode/settings.json`; reuse hooks from `.claude/settings.json`); install `docs-explorer` agent + chat mode only |
 | 4 — Context docs | `step-4-context-docs.md` | Targeted reads only | Which domains | Doc list from tree or graph |
 | 5 — MCP | `step-5-mcp.md` | No | Figma for frontend? yes/no | Baseline only (filesystem, memory, git, context7) |
 | 6 — Skills | `step-6-skills.md` | Reuse Phase 1 | Staple + codebase-specific list | Staples (§6.2) + one per major framework/runtime found |
@@ -87,9 +87,9 @@ One row per phase: what to load, whether it scans, what to ask, and what to do i
 - **Phase 0.5 / 1:** If Graphify is declined or install fails, fall through to `/init` discovery in Phase 1.
 - **Phase 1:** Also write the Copilot entry file `.github/copilot-instructions.md` from the same discovery (no routing table — Copilot uses `applyTo` auto-load).
 - **Phase 2.5:** Author `.github/instructions/*.instructions.md` — the **shared** scoped rules both tools consume (Copilot via `applyTo`, Claude via the routing table). Reconcile the Step 1 routing rows against the files actually created.
-- **Phase 3:** Merge Graphify PreToolUse if Step 0.5 ran (§3.2). Default subagent is `docs-explorer` (template at `agents/docs-explorer.md`) when the human names nothing else; mirror it with the `docs-explorer` Copilot **chat mode** (`chatmodes/docs-explorer.chatmode.md`). Hooks/permissions are Claude-only — Copilot has no equivalent.
+- **Phase 3:** Merge Graphify PreToolUse if Step 0.5 ran (§3.2). Default subagent is `docs-explorer` (template at `agents/docs-explorer.md`) when the human names nothing else; mirror it with the `docs-explorer` Copilot **chat mode** (`chatmodes/docs-explorer.chatmode.md`). Hooks/permissions now have Copilot parity (§3.4): VS Code Copilot **reuses the same `.claude/settings.json` hooks** (Preview, matchers ignored), and permission denies are mirrored in `.vscode/settings.json` (`chat.tools.terminal.autoApprove`) — so no second hooks file, one extra settings file.
 - **Phase 5:** Mirror `.mcp.json` with `.vscode/mcp.json` for Copilot (§5.4 — `servers`/`inputs` schema, hosted `github` server).
-- **Phase 6:** Staples are security, primary-language conventions, and testing (§6.2), plus codebase-specific skills from Phase 1 discovery. Convert **task/workflow** skills to `.github/prompts/*.prompt.md` (§6.5); reference skills are already covered by Phase 2.5 instruction files.
+- **Phase 6:** Staples are security, primary-language conventions, and testing (§6.2), plus codebase-specific skills from Phase 1 discovery. Convert **task/workflow** skills to `.github/prompts/*.prompt.md` (§6.5); reference skills are already covered by Phase 2.5 instruction files. **If Figma was opted in (Phase 5),** install the `figma-to-code` skill + `figma.prompt.md` design-to-code pairing (§6.7).
 
 ### Phase 0 policy questionnaire (front-load every gate)
 
@@ -98,7 +98,7 @@ A lower-tier facilitator loses the thread when it re-derives policy at each phas
 | Gate | Phase it controls | Question | Default |
 |------|-------------------|----------|---------|
 | Graphify | 0.5 | Enable the codebase graph? | Yes if the repo is large/interconnected; No for a couple-dozen-file app |
-| Copilot parity | 1, 3, 5, 6 | Also generate the GitHub Copilot counterparts (entry file, chat modes, `.vscode/mcp.json`, prompts)? | Yes |
+| Copilot parity | 1, 3, 5, 6 | Also generate the GitHub Copilot counterparts (entry file, chat modes, `.vscode/mcp.json`, `.vscode/settings.json` permissions, prompts)? | Yes |
 | Lint hook | 3 | `PostToolUse` lint-after-edit? | Yes |
 | Permission denies | 3 | Deny `rm -rf` + `.env` reads? | Yes |
 | Stop test gate | 3 | Run typecheck/tests before Claude stops? | No (opt-in — adds latency on every stop) |
