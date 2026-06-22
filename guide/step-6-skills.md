@@ -113,42 +113,17 @@ The skill complements the **PreToolUse hook** from `graphify claude install --pr
 
 ---
 
-## 6.5 Copilot parity — `.github/prompts/*.prompt.md`
+## 6.5 Copilot parity — skills are shared, no prompts needed
 
-Claude skills split into two kinds, and each maps to a **different** Copilot artifact —
-don't force everything into prompts:
+Copilot Chat in VS Code reads `.claude/skills/<name>/SKILL.md` directly — both **reference**
+skills (`clean-<lang>`, `<domain>-security`, `<framework>-best-practices`) and **task /
+workflow** skills (`disable-model-invocation: true` — deploy, scaffold, review, `figma-to-code`)
+are usable from either tool with no separate `.github/prompts/*.prompt.md` artifact.
 
-| Claude skill kind | Copilot equivalent | Why |
-|-------------------|--------------------|-----|
-| **Reference** (`clean-<lang>`, `<domain>-security`, `<framework>-best-practices`) | `.github/instructions/*.instructions.md` (Step 2.5) | Conventions auto-applied by `applyTo` glob — Copilot has no "reference skill" concept |
-| **Task / workflow** (`disable-model-invocation: true` — deploy, scaffold, review) | `.github/prompts/<name>.prompt.md` | A reusable prompt the user runs deliberately with `/<name>` in Copilot Chat |
-
-So: convert each **task skill** to a prompt; the **reference skills** are already covered
-by the instruction files from Step 2.5 (don't duplicate them as prompts).
-
-```markdown
----
-mode: agent
-description: One line — shown in the /prompt picker.
----
-Instructions for the workflow. Reference scoped rules by name
-(e.g. "follow frontend.instructions.md"). Use ${input:name} for arguments.
-```
-
-| Field | Notes |
-|-------|-------|
-| `mode: agent` | Lets the prompt use tools / multi-step agent flow (vs. a plain chat prompt) |
-| `description` | Shown in the `/` picker — lead with what it does |
-| `${input:<id>}` | Prompts the user for an argument when the command runs (parity with skill `${input}` / args) |
-
-Mirror the demo prompts for shape: `review.prompt.md` (review the diff), `scaffold-component.prompt.md`
-(scaffold following `frontend.instructions.md`). The **`figma.prompt.md`** (build from a Figma
-frame) is the Copilot counterpart of the `figma-to-code` skill — its content and gating live in
-**§6.7**. A prompt should **point at** the instruction files rather than restating their rules —
-same no-duplication discipline as everywhere else.
-
-**Already created:** `.github/prompts/graphify.prompt.md` exists if Graphify was enabled
-(Step 2 / Step 0.5) — don't recreate it here.
+So: write each skill once under `.claude/skills/`. Reference skills are *additionally*
+covered by the `.github/instructions/*.instructions.md` files from Step 2.5 (Copilot's
+`applyTo` auto-load), but task skills need nothing further — don't generate prompt
+duplicates for them.
 
 ## 6.6 Content rules (apply to every generated skill)
 
@@ -175,12 +150,10 @@ same no-duplication discipline as everywhere else.
 ## 6.7 Figma design-to-code *(only if Figma was opted in)*
 
 **Skip this section** if the Figma MCP server was not added in Step 5. When it was, install
-the streamlined design-to-code pairing so both tools build from a frame the same way:
-
-| Tool | Artifact | Role |
-|------|----------|------|
-| Claude | `.claude/skills/figma-to-code/SKILL.md` | Auto-routes on Figma/design requests; pulls the frame via the figma MCP, maps to existing components, builds per `frontend.instructions.md` |
-| Copilot | `.github/prompts/figma.prompt.md` | The `/figma` workflow — same flow, points at the same instruction files |
+`.claude/skills/figma-to-code/SKILL.md` — it auto-routes on Figma/design requests, pulls the
+frame via the figma MCP, maps it to existing components, and builds per
+`frontend.instructions.md`. It's visible to Copilot Chat directly too (§6.5), so no separate
+prompt file is needed.
 
 Copy the template at [`skills/figma-to-code/`](skills/figma-to-code/) in this guide folder
 to `.claude/skills/figma-to-code/` in the target repo. It's a **task skill** (a workflow),
@@ -188,33 +161,20 @@ but left model-invocable so a request like "build this Figma frame" auto-routes 
 design payload from the figma MCP is large — the skill reads only the target node and notes
 that very large frames can set `context: fork` + `agent` to isolate the read.
 
-The Copilot `figma.prompt.md` is the parity. It **points at** the same instruction files
-rather than restating rules:
+Alongside the skill, create `.claude/skills/figma-to-code/README.md` documenting
+`FIGMA_API_KEY` setup: a gitignored `.env` with the token, exporting it before starting
+Claude (`${FIGMA_API_KEY}` in `.mcp.json` expands from the shell environment, not `.env`
+automatically), and that `.vscode/mcp.json` prompts for the key via VS Code's secure input
+on the Copilot side — see Step 5 §5.2.
 
-```markdown
----
-mode: agent
-description: Build or update UI from a Figma frame — maps the design to existing components, then implements.
----
-Build the UI for the Figma node at ${input:figmaUrl:Figma frame/component URL or selection}.
-
-1. Read the design context via the **figma** MCP server (`.vscode/mcp.json`) — the target
-   node only, not the whole file.
-2. Map each layer to an existing component (reuse), one to extend, or a justified new
-   component. Map Figma styles to the codebase's existing tokens, not literal hex/px.
-3. Implement following `.github/instructions/frontend.instructions.md` and the project's
-   component conventions. Reuse before creating.
-4. Report the layer → component mapping and any deviations from the design.
-```
-
-Both artifacts must follow the **content rules in §6.6** and reuse existing components and
+The skill must follow the **content rules in §6.6** and reuse existing components and
 tokens before creating new ones — pixel-cloning a frame into bespoke markup is the failure
-mode this pairing exists to prevent.
+mode it exists to prevent.
 
 ---
 
 > **AI-DLC checkpoint — Phase 6**
-> Stop. Propose the staple skills (§6.2) plus a shortlist of codebase-specific skills (§6.3) inferred from Phase 1 discovery. **If Graphify was enabled (Step 0.5),** confirm the `graphify` skill from §6.4 — do not duplicate. **If Figma was opted in (Step 5),** install the `figma-to-code` skill + `figma.prompt.md` from §6.7. Ask the human to confirm, trim, or add to the list. If they defer, generate the staples plus one skill per major framework/runtime actually found — skip categories with no evidence in the repo. For **Copilot parity (§6.5)**, convert each task/workflow skill to a `.github/prompts/*.prompt.md`; reference skills are already covered by Step 2.5 instruction files — don't duplicate. Show draft `SKILL.md` and any new prompt content before writing; every file must follow the content rules in §6.6.
+> Stop. Propose the staple skills (§6.2) plus a shortlist of codebase-specific skills (§6.3) inferred from Phase 1 discovery. **If Graphify was enabled (Step 0.5),** confirm the `graphify` skill from §6.4 — do not duplicate. **If Figma was opted in (Step 5),** install the `figma-to-code` skill + its `README.md` from §6.7. Ask the human to confirm, trim, or add to the list. If they defer, generate the staples plus one skill per major framework/runtime actually found — skip categories with no evidence in the repo. Skills are shared with Copilot Chat directly (§6.5) — no `.github/prompts/*.prompt.md` duplicates. Show draft `SKILL.md` (and `README.md` for figma-to-code) before writing; every file must follow the content rules in §6.6.
 
 ---
 
@@ -228,6 +188,7 @@ Skills are auto-discovered from `.claude/skills/` — there's no routing table t
 **Looking for more skills?** Browse [skills.sh](https://www.skills.sh/) — a community directory of ready-made Claude Code skills you can drop into `.claude/skills/`.
 
 **End of documented steps.** Scoped instructions (Step 2.5) and Copilot parity —
-`.github/copilot-instructions.md` (Step 1), chat modes (Step 3), `.vscode/mcp.json`
-(Step 5), and `.github/prompts/` (§6.5) — are now part of the documented flow. Add
-further steps as new files in this folder — see the `HARNESS_SETUP_GUIDE.md` extension pattern.
+`.github/copilot-instructions.md` (Step 1), chat modes (Step 3), and `.vscode/mcp.json`
+(Step 5) — are now part of the documented flow. Skills (§6.5) need no separate Copilot
+artifact. Add further steps as new files in this folder — see the `HARNESS_SETUP_GUIDE.md`
+extension pattern.

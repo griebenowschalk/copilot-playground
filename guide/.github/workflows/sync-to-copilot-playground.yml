@@ -1,0 +1,27 @@
+name: Sync to copilot-playground
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: griebenowschalk/copilot-playground
+          token: ${{ secrets.COPILOT_SYNC_PAT }}
+          path: target
+
+      - run: |
+          rm -rf target/guide/*
+          rsync -a --exclude=target . target/guide/
+          cd target
+          git config user.email "bot@example.com"
+          git config user.name "Sync Bot"
+          git add -A
+          git diff-index --quiet HEAD || git commit -m "Sync guide from ai-dlc-harness"
+          git push

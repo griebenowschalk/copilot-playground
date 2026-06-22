@@ -131,9 +131,10 @@ Step 0.5 runs `graphify claude install --project`, which adds a **PreToolUse** h
 
 Because VS Code Copilot reads the same `.claude/settings.json` `hooks` block (§3.4), it
 picks up this merged PreToolUse hook too — though it **ignores the matcher** and runs the
-hook on every tool call (Preview limitation). The Graphify section in `AGENTS.md`,
-`copilot-instructions.md`, and the `/graphify` prompt remain the primary, version-agnostic
-nudge for Copilot.
+hook on every tool call (Preview limitation). The Graphify section in `AGENTS.md` and
+`copilot-instructions.md`, plus the `graphify` skill (`.claude/skills/graphify/`, available
+directly as `/graphify` in Copilot Chat), remain the primary, version-agnostic nudge for
+Copilot.
 
 ---
 

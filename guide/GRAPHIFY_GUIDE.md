@@ -139,6 +139,7 @@ big refactor / changed .graphifyignore?
 | `graphify update .` | After `git pull` without hooks, or before architecture work if graph may be stale |
 | `graphify update . --no-cluster` | Faster incremental refresh; skip community clustering |
 | `graphify extract . --force` | Graph shrunk, wrong, or huge structural change |
+| `graphify update .` in a dev-server file watcher | Live freshness while editing (debounced + guarded) — closes the uncommitted-edit gap the hooks miss; optional |
 | `ls graphify-out/graph.json` | Confirm the graph exists before a big architecture session |
 
 **Avoid:** `graphify extract .` every session — full re-parse is wasteful when `update` or git hooks suffice.

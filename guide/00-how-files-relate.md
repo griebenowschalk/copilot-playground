@@ -23,7 +23,7 @@ mirrored (parallel file), one reused (VS Code Copilot reads Claude's hooks direc
 | Shared baseline | `AGENTS.md` | `AGENTS.md` *(same file)* |
 | Scoped rules | files the routing table points at | `.github/instructions/*.instructions.md` *(same files — Step 2.5)* |
 | Specialist agents | `.claude/agents/*.md` subagents | `.github/chatmodes/*.chatmode.md` chat modes |
-| Reusable procedures | `.claude/skills/`, `.claude/commands/` | `.github/prompts/*.prompt.md` |
+| Reusable procedures | `.claude/skills/<name>/SKILL.md` | *(same files — Copilot Chat in VS Code reads `.claude/skills/` directly, no `.github/prompts/` duplicates)* |
 | External tools (MCP) | `.mcp.json` (`mcpServers`, `${VAR}`) | `.vscode/mcp.json` (`servers`, `${input:…}`) |
 | Hooks | `.claude/settings.json` (`hooks`) | reads the **same** `.claude/settings.json` hooks *(VS Code Preview; matchers ignored, runs on all tool calls)* — or `.github/hooks/*.json` |
 | Permissions | `.claude/settings.json` (`permissions` allow/deny) | `.vscode/settings.json` (`chat.tools.terminal.autoApprove`, `chat.tools.edits.autoApprove`, `chat.agent.networkFilter`) |
@@ -42,3 +42,13 @@ create `CLAUDE.md` **and** `.github/copilot-instructions.md` from the same disco
 **Load order (runtime):**
 - **Copilot:** `AGENTS.md` → `.github/copilot-instructions.md` → `applyTo` scoped rules (by edited file).
 - **Claude:** `AGENTS.md` → `CLAUDE.md` → routed scoped rules (on demand).
+
+## Workspace hygiene: `.copilotignore` for `guide/`
+
+This `guide/` folder contains copyable skill templates (`skills/graphify/`,
+`skills/figma-to-code/`, …) with the **same `name:`** as the installed copies under
+`.claude/skills/`. Copilot Chat in VS Code scans the whole workspace for `SKILL.md` files,
+so without exclusion it shows **two** entries for `/graphify` (and `/figma-to-code`) — the
+real skill and the guide template. At Phase 0/1, create a `.copilotignore` at the repo root
+containing `guide/` so only the installed `.claude/skills/` copies are discoverable. This
+does not affect Claude, which only reads `.claude/skills/`.

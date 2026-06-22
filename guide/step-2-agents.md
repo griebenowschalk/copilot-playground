@@ -13,18 +13,10 @@ For cross-file architecture questions, use the graph (`/graphify` or `graphify q
 
 Keep this **one short paragraph** — the PreToolUse hook and `graphify` skill carry the graph-first workflow; do not expand `AGENTS.md` with query gates or when-to-use tables.
 
-And add `.github/prompts/graphify.prompt.md` for Copilot (this is the first Copilot
-prompt; the general prompt format and how skills map to prompts are covered in Step 6 §6.5):
+The `graphify` skill (`.claude/skills/graphify/`, Step 6 §6.4) is visible to Copilot Chat
+directly — no separate `.github/prompts/graphify.prompt.md` is needed for parity.
 
-```markdown
----
-mode: agent
----
-Use the Graphify skill / MCP to query the codebase graph before reading many source files.
-Prefer `graphify query "..."` for architecture and cross-file questions.
-```
-
-**If Graphify was skipped, omit these** — do not reference Graphify in `AGENTS.md` or install graphify prompt/skill files.
+**If Graphify was skipped, omit this** — do not reference Graphify in `AGENTS.md` or install the graphify skill.
 
 ---
 

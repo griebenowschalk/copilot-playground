@@ -21,7 +21,6 @@ flowchart TB
   subgraph committed [Committed to git]
     mcpJson[".mcp.json"]
     claudeMd["CLAUDE.md MCP section"]
-    envExample[".env.example"]
   end
   subgraph gitignored [Gitignored]
     dotEnv[".env"]
@@ -118,21 +117,12 @@ Append to `mcpServers`:
 }
 ```
 
-Append to `.env.example` (only when Figma is included):
-
-```bash
-# Used by the Figma MCP server.
-FIGMA_API_KEY=""
-```
-
-**`.env` workflow** *(Figma only)*:
-
-1. Copy `.env.example` → `.env`
-2. Paste your Figma personal access token into `FIGMA_API_KEY`
-3. Export vars before starting Claude — Claude expands `${FIGMA_API_KEY}` from the **shell environment**, not from `.env` automatically. Options:
-   - `export $(grep -v '^#' .env | xargs)` before `claude`
-   - [direnv](https://direnv.net/) with `.envrc` loading `.env`
-   - Set `FIGMA_API_KEY` in your shell profile
+**`.env` setup** *(Figma only)*: document this in `.claude/skills/figma-to-code/README.md`
+(created alongside the skill in Step 6 §6.7) rather than generating an `.env.example` —
+cover creating a gitignored `.env` with `FIGMA_API_KEY`, and exporting it before starting
+Claude (`${FIGMA_API_KEY}` in `.mcp.json` is expanded from the **shell environment**, not
+read from `.env` automatically — `export $(grep -v '^#' .env | xargs)` or
+[direnv](https://direnv.net/)).
 
 Step 3 already keeps keys out of the model context on both tools: Claude denies
 `Read(./.env)` via `permissions`, and the Copilot side combines the shared
@@ -140,9 +130,9 @@ Step 3 already keeps keys out of the model context on both tools: Claude denies
 deny on `.env` (Step 3 §3.4).
 
 **Using the Figma MCP to build:** once this server is connected, the streamlined
-design-to-code path is the **`figma-to-code` skill** (Claude) and its `figma.prompt.md`
-counterpart (Copilot) — both pull the frame via this server, map it to existing components,
-then build. See Step 6 §6.7.
+design-to-code path is the **`figma-to-code` skill** — it pulls the frame via this server,
+maps it to existing components, then builds. It's visible to Copilot Chat directly too, so
+no separate prompt counterpart is needed. See Step 6 §6.7.
 
 ---
 
@@ -153,7 +143,6 @@ Add to `.gitignore` if missing:
 ```
 .env
 .env.*
-!.env.example
 .claude/memory.jsonl
 ```
 
@@ -240,8 +229,8 @@ CLI alternatives: `claude mcp list` and `claude mcp status <name>`.
 ---
 
 > **AI-DLC checkpoint — Phase 5**
-> Stop. **If the Phase 0 questionnaire already answered the Figma gate, apply it.** Otherwise ask: **frontend project with Figma designs?** (yes → append `figma` server + `FIGMA_API_KEY` to `.env.example`; no → baseline only).
-> Show draft `.mcp.json`, the parity `.vscode/mcp.json` (§5.4), `.env.example` (if Figma), gitignore additions, and `CLAUDE.md` MCP section for approval.
+> Stop. **If the Phase 0 questionnaire already answered the Figma gate, apply it.** Otherwise ask: **frontend project with Figma designs?** (yes → append `figma` server + `FIGMA_API_KEY`; no → baseline only).
+> Show draft `.mcp.json`, the parity `.vscode/mcp.json` (§5.4), gitignore additions, and `CLAUDE.md` MCP section for approval. If Figma is included, note that `FIGMA_API_KEY` setup is documented in `.claude/skills/figma-to-code/README.md` (Step 6 §6.7).
 > After write: verify with `/mcp` (Claude) and the Copilot Chat MCP list (VS Code). Do not hardcode API keys.
 
 **Next:** `step-6-skills.md`

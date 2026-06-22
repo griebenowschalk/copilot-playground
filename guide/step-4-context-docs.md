@@ -123,6 +123,14 @@ Add rows to the `CLAUDE.md` routing table so Claude reads context docs on demand
 
 Do **not** copy context docs into `AGENTS.md` — too long for every request.
 
+**Surface to Copilot (one line, not inline):** the `CLAUDE.md` routing table is Claude-only — Copilot Chat won't *discover* `docs/context/` for "how does X work" questions unless told they exist. Add a **single pointer line** to `.github/copilot-instructions.md` (which loads every request), not the doc content:
+
+```markdown
+Deeper architecture/onboarding notes live in `docs/context/` (architecture, frontend, api, auth) — open on demand for "how does X work" questions.
+```
+
+Inlining the prose instead would bloat every Copilot request for low payoff — Chat can already open the files via `@workspace`. Skip even the pointer if graphify is enabled and already answers architecture questions for Copilot (`/graphify`), to avoid redundancy.
+
 **Optional — enforce rules on edits:** create `.github/instructions/context-docs.instructions.md` with `applyTo: "docs/context/**"` mirroring the documentation rules above, so Copilot follows the same constraints when editing context files. Use the instruction-file format from Step 2.5.
 
 **Next:** `step-5-mcp.md`

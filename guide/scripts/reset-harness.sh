@@ -85,10 +85,8 @@ smart_remove LEARN.md
 
 # Step 5 MCP
 smart_remove .mcp.json
-smart_remove .env            # harness-created from .env.example; run `pnpm setup` to restore
 
 # App files the harness may have modified — restore if tracked, skip if unchanged
-smart_remove .env.example
 smart_remove .gitignore
 
 # .github/ — copilot-instructions.md, instructions/, chatmodes/, prompts/
@@ -107,9 +105,9 @@ smart_remove docs
 # Graphify — graph output and ignore file (Step 0.5)
 smart_remove graphify-out
 smart_remove .graphifyignore
+smart_remove .copilotignore
 
 # Per-run ledger — gitignored under guide/ inside the target
 smart_remove guide/.harness-progress.md
 
 echo "Harness reset complete — app code untouched."
-[[ $DRY_RUN == 0 ]] && echo "If .env was removed, run: pnpm setup"

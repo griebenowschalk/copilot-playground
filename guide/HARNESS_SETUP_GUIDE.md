@@ -13,7 +13,7 @@ A step-by-step guide for setting up a shared AI layer for GitHub Copilot and Cla
 | **Manual** | You read each step file and create/edit files yourself | Learning the harness, small tweaks, full control |
 | **AI-DLC** | An AI facilitator runs the phases; you answer policy questions and approve drafts | Rolling out the harness with a senior or team lead in the loop |
 
-**Manual:** read `00-how-files-relate.md`, then `step-1-claude.md` through `step-6-skills.md` (including `step-2.5-instructions.md`). Optionally run `step-0.5-graphify.md` first. Each step produces both the Claude artifact and its GitHub Copilot counterpart (entry file, scoped instructions, chat modes, `.vscode/mcp.json`, prompts) — see the parity table in `00-how-files-relate.md`.
+**Manual:** read `00-how-files-relate.md`, then `step-1-claude.md` through `step-6-skills.md` (including `step-2.5-instructions.md`). Optionally run `step-0.5-graphify.md` first. Each step produces both the Claude artifact and its GitHub Copilot counterpart (entry file, scoped instructions, chat modes, `.vscode/mcp.json`) — see the parity table in `00-how-files-relate.md`.
 
 **AI-DLC:** open this hub plus the **current phase step file** in your agent. Pause at every **AI-DLC checkpoint** in that step file.
 
@@ -53,7 +53,7 @@ When a senior or team lead uses AI-DLC mode, work **phase by phase** — the hum
 
 1. **One phase at a time** — map 1:1 to `step-*.md` files in this folder.
 2. **Load the current step only** — this hub for rules; step file for instructions and checkpoint.
-3. **Single discovery** — one repo scan, then reuse that output. **With Graphify:** Phase 0.5; Phases 1–4 use graph output. **Without Graphify:** Phase 1 (`/init`); later phases reuse `CLAUDE.md` and init output. In the **same** pass, inventory any pre-existing harness files and their current contents (`CLAUDE.md`, `AGENTS.md`, `.claude/settings.json`, `.mcp.json`, `.env.example`, `.github/`) so later phases apply that state instead of re-reading it file-by-file at each gate.
+3. **Single discovery** — one repo scan, then reuse that output. **With Graphify:** Phase 0.5; Phases 1–4 use graph output. **Without Graphify:** Phase 1 (`/init`); later phases reuse `CLAUDE.md` and init output. In the **same** pass, inventory any pre-existing harness files and their current contents (`CLAUDE.md`, `AGENTS.md`, `.claude/settings.json`, `.mcp.json`, `.github/`) so later phases apply that state instead of re-reading it file-by-file at each gate.
 4. **Phase gate** — show the **decision** (the list/table of files you'll create + any policy choices) plus **at most one sample artifact** when the phase emits several files → get approval → write the **whole set** → tick the phase in `guide/.harness-progress.md` (one checkbox + the `Next:` line — a few tokens) → summarize → proceed. **Never paste a full set of files into chat before writing them** — that duplicates every artifact in the transcript (once as prose, once in the write call), the single biggest avoidable token cost on a run. Render full content in chat only for the two always-loaded entry files (`CLAUDE.md`, `AGENTS.md`), where exact wording is the review target.
 5. **Ask on policy**; **infer on facts** already captured in Phase 1.
 6. **Escape hatch** at every policy checkpoint: *"Specify now, or I'll infer and show a draft to approve."*
@@ -85,11 +85,11 @@ One row per phase: what to load, whether it scans, what to ask, and what to do i
 
 - **Phase 0:** Confirm workspace root, then run the **Phase 0 policy questionnaire** (below) to capture every binary gate up front — Graphify, hooks, subagents, Figma, Copilot parity — and record the answers in the ledger so later phases apply them without re-asking. Open with: *"At Phase 0.5 I'll ask whether you want Graphify. Either way, we do one discovery pass — graph or `/init` — then reuse it for the rest."* On a **large repo or monorepo**, read `large-codebases.md` first — it covers per-package scoping and splitting the run across fresh context windows at phase gates.
 - **Phase 0.5 / 1:** If Graphify is declined or install fails, fall through to `/init` discovery in Phase 1.
-- **Phase 1:** Also write the Copilot entry file `.github/copilot-instructions.md` from the same discovery (no routing table — Copilot uses `applyTo` auto-load).
+- **Phase 1:** Also write the Copilot entry file `.github/copilot-instructions.md` from the same discovery (no routing table — Copilot uses `applyTo` auto-load). If Copilot parity is in scope, also create `.copilotignore` containing `guide/` (see `00-how-files-relate.md` § Workspace hygiene) — prevents Copilot Chat from showing duplicate `/graphify` / `/figma-to-code` entries from the guide's skill templates.
 - **Phase 2.5:** Author `.github/instructions/*.instructions.md` — the **shared** scoped rules both tools consume (Copilot via `applyTo`, Claude via the routing table). Reconcile the Step 1 routing rows against the files actually created.
 - **Phase 3:** Merge Graphify PreToolUse if Step 0.5 ran (§3.2). Default subagent is `docs-explorer` (template at `agents/docs-explorer.md`) when the human names nothing else; mirror it with the `docs-explorer` Copilot **chat mode** (`chatmodes/docs-explorer.chatmode.md`). Hooks/permissions now have Copilot parity (§3.4): VS Code Copilot **reuses the same `.claude/settings.json` hooks** (Preview, matchers ignored), and permission denies are mirrored in `.vscode/settings.json` (`chat.tools.terminal.autoApprove`) — so no second hooks file, one extra settings file.
 - **Phase 5:** Mirror `.mcp.json` with `.vscode/mcp.json` for Copilot (§5.4 — `servers`/`inputs` schema, hosted `github` server).
-- **Phase 6:** Staples are security, primary-language conventions, and testing (§6.2), plus codebase-specific skills from Phase 1 discovery. Convert **task/workflow** skills to `.github/prompts/*.prompt.md` (§6.5); reference skills are already covered by Phase 2.5 instruction files. **If Figma was opted in (Phase 5),** install the `figma-to-code` skill + `figma.prompt.md` design-to-code pairing (§6.7).
+- **Phase 6:** Staples are security, primary-language conventions, and testing (§6.2), plus codebase-specific skills from Phase 1 discovery. Skills are shared with Copilot Chat directly (§6.5) — no `.github/prompts/*.prompt.md` duplicates. **If Figma was opted in (Phase 5),** install the `figma-to-code` skill + its `README.md` (FIGMA_API_KEY setup) per §6.7.
 
 ### Phase 0 policy questionnaire (front-load every gate)
 
@@ -98,7 +98,7 @@ A lower-tier facilitator loses the thread when it re-derives policy at each phas
 | Gate | Phase it controls | Question | Default |
 |------|-------------------|----------|---------|
 | Graphify | 0.5 | Enable the codebase graph? | Yes if the repo is large/interconnected; No for a couple-dozen-file app |
-| Copilot parity | 1, 3, 5, 6 | Also generate the GitHub Copilot counterparts (entry file, chat modes, `.vscode/mcp.json`, `.vscode/settings.json` permissions, prompts)? | Yes |
+| Copilot parity | 1, 3, 5 | Also generate the GitHub Copilot counterparts (entry file, chat modes, `.vscode/mcp.json`, `.vscode/settings.json` permissions)? | Yes |
 | Lint hook | 3 | `PostToolUse` lint-after-edit? | Yes |
 | Permission denies | 3 | Deny `rm -rf` + `.env` reads? | Yes |
 | Stop test gate | 3 | Run typecheck/tests before Claude stops? | No (opt-in — adds latency on every stop) |

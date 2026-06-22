@@ -34,6 +34,30 @@ graphify update .               # after git pull if hooks off, or graph may be s
 
 Default: hooks keep the graph fresh — do not re-extract every session. See [when-to-use.md](when-to-use.md) § Keep the graph fresh.
 
+## Team setup (per-dev, local-only)
+
+`graphify-out/` is gitignored — every dev builds and maintains their own graph
+locally; only this skill and `.graphifyignore` are shared via the repo. Setup is
+opt-in and runs **once**; nothing reinstalls graphify on every dev run.
+
+**One-time per clone:** install the CLI (`uv tool install graphifyy`), install
+the git hooks (`graphify hook install` — `.git/hooks/` isn't versioned, so this
+is per clone, not shared), then `graphify extract .` for the initial build. A
+small setup script wired to a package command (e.g. `npm run graphify:setup`)
+makes this one command for teammates.
+
+**Automatic updates afterwards** — all incremental + AST-only (no LLM/API cost),
+so the local graph is never stale when you query it:
+
+| When | Mechanism |
+|------|-----------|
+| Editing during dev | Dev-server file watcher (Vite/webpack/nodemon) → debounced `graphify update .` — closes the uncommitted-edit staleness gap |
+| `git commit` | post-commit hook (background) |
+| `git checkout` / `git pull` (branch switch) | post-checkout hook (background) |
+
+Guard the watcher (`[ -d graphify-out ] && command -v graphify …`) so it's a
+silent no-op for devs who never ran setup — graphify stays fully opt-in.
+
 ## Query commands
 
 ```bash
