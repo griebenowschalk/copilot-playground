@@ -162,10 +162,10 @@ design payload from the figma MCP is large — the skill reads only the target n
 that very large frames can set `context: fork` + `agent` to isolate the read.
 
 Alongside the skill, create `.claude/skills/figma-to-code/README.md` documenting
-`FIGMA_API_KEY` setup: a gitignored `.env` with the token, exporting it before starting
-Claude (`${FIGMA_API_KEY}` in `.mcp.json` expands from the shell environment, not `.env`
-automatically), and that `.vscode/mcp.json` prompts for the key via VS Code's secure input
-on the Copilot side — see Step 5 §5.2.
+`FIGMA_API_KEY` setup: a single gitignored `.env` with the token serves **both** tools.
+Both `.mcp.json` (Claude) and `.vscode/mcp.json` (Copilot) wrap the figma server in the same
+`sh -c` launcher that reads **only** `FIGMA_API_KEY` from `.env` at startup — no manual
+`export`, no VS Code prompt, no per-tool divergence. See Step 5 §5.2 and §5.4.
 
 The skill must follow the **content rules in §6.6** and reuse existing components and
 tokens before creating new ones — pixel-cloning a frame into bespoke markup is the failure

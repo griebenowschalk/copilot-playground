@@ -215,34 +215,56 @@ the schema differs in three ways:
 | | `.mcp.json` (Claude) | `.vscode/mcp.json` (Copilot) |
 |--|----------------------|------------------------------|
 | Top-level key | `mcpServers` | `servers` |
-| Secrets | `${VAR}` expanded from shell env | `inputs` block + `${input:<id>}` — VS Code **prompts** for the value and stores it securely |
-| Hosted servers | stdio/npx | also supports `type: http` (e.g. Copilot's hosted GitHub server) |
+| Path variable | `${CLAUDE_PROJECT_DIR}` (wrap in `sh -c`, see §5.1) | `${workspaceFolder}` (expands directly in args — no `sh -c` needed for paths) |
+
+**Keep secret handling identical across both tools.** A `.env`-backed server (e.g. `figma`)
+should read its key **the same way on both sides** — the same `sh -c` wrapper that extracts
+**only** `FIGMA_API_KEY` from `.env` at launch (§5.2). One setup step (`.env` with the key)
+then serves Claude and Copilot alike. Don't split the mechanism — a VS Code `inputs` prompt
+on the Copilot side while Claude reads `.env` means two places to configure the same secret
+and two different failure modes to debug.
 
 ```json
 {
-  "inputs": [
-    { "type": "promptString", "id": "figma-key", "description": "Figma API Key", "password": true }
-  ],
   "servers": {
-    "context7": { "type": "stdio", "command": "npx", "args": ["-y", "@upstash/context7-mcp"] },
-    "github":   { "type": "http", "url": "https://api.githubcopilot.com/mcp/" },
-    "figma": {
+    "filesystem": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "figma-developer-mcp", "--stdio"],
-      "env": { "FIGMA_API_KEY": "${input:figma-key}" }
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "${workspaceFolder}/src", "${workspaceFolder}/docs"]
+    },
+    "memory": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "env": { "MEMORY_FILE_PATH": "${workspaceFolder}/.claude/memory.jsonl" }
+    },
+    "git": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["mcp-server-git", "--repository", "${workspaceFolder}"]
+    },
+    "context7": { "type": "stdio", "command": "npx", "args": ["-y", "@upstash/context7-mcp"] },
+    "figma": {
+      "type": "stdio",
+      "command": "sh",
+      "args": [
+        "-c",
+        "f=\"${workspaceFolder}/.env\"; [ -f \"$f\" ] && export FIGMA_API_KEY=\"$(sed -n 's/^FIGMA_API_KEY=//p' \"$f\" | tail -1)\"; exec npx -y figma-developer-mcp --stdio"
+      ]
     }
   }
 }
 ```
 
-- Include the **same baseline servers** as `.mcp.json` (filesystem, memory, git, context7)
-  unless a server is Claude-specific. The hosted **`github`** server is Copilot-native —
-  add it here even though it has no `.mcp.json` counterpart.
-- **Secrets:** use an `inputs` entry with `password: true` and reference it as
-  `${input:<id>}` — VS Code prompts once and stores it, so no `.env` plumbing is needed on
-  the Copilot side. Omit the `figma` server and its input if Figma was not opted in.
-- **Commit** `.vscode/mcp.json` — it contains only input placeholders, never literal keys.
+- Mirror the **same baseline servers** as `.mcp.json` (filesystem, memory, git, context7). Because `${workspaceFolder}` expands natively in VS Code args, paths can be passed directly without the `sh -c` wrapper — only the `figma` server still needs `sh -c` to read `.env` at launch.
+- **Secrets:** read **only** `FIGMA_API_KEY` from the gitignored `.env` using `sed`. The same least-privilege rule from §5.2 applies: never `source` the whole `.env`. Omit the `figma` server entirely if Figma was not opted in.
+- **Commit** `.vscode/mcp.json` — the wrapper reads `.env` at runtime, so the file contains no literal keys.
+
+> **Alternative — VS Code `inputs` prompt.** VS Code also supports an `inputs` block with
+> `${input:<id>}`, which prompts once and stores the value in secure storage. It's a valid
+> Copilot-only pattern, but it **diverges from the `.env` approach Claude uses** — so prefer
+> the shared `.env` wrapper above for parity, and reach for `inputs` only when a team
+> explicitly wants VS Code's secret store instead of a `.env` file.
 
 ## 5.5 When to use each server
 
