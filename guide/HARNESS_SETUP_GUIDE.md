@@ -76,7 +76,7 @@ One row per phase: what to load, whether it scans, what to ask, and what to do i
 | 1 — Init | `step-1-claude.md` | Subagent scan / `/init` — reused after | Routing rows | Agent-generate from discovery |
 | 2 — Baseline | `step-2-agents.md` | Reuse Phase 1 | 3–6 non-negotiables | Propose from conventions; skip inapplicable categories |
 | 2.5 — Instructions | `step-2.5-instructions.md` | Reuse Phase 1 | Which scoped domains | One file per layer found + `security` (`applyTo: "**"`) |
-| 3 — Guardrails | `step-3-claude-folder.md` | Reuse Phase 1 | Hooks/permissions (§3.1) + subagents/chat modes (§3.3) + Copilot permission parity (§3.4) | Minimal lint + denies (mirror denies to `.vscode/settings.json`; reuse hooks from `.claude/settings.json`); install `docs-explorer` agent + chat mode only |
+| 3 — Guardrails | `step-3-claude-folder.md` | Reuse Phase 1 | Hooks/permissions (§3.1) + subagents/chat modes (§3.3) + Copilot permission parity (§3.4) | File-scoped lint + SessionStart memory loader; `deny` in committed `settings.json`, `allow` in `settings.local.json` (mirror denies to `.vscode/settings.json`; reuse hooks from `.claude/settings.json`); install `docs-explorer` agent + chat mode only |
 | 4 — Context docs | `step-4-context-docs.md` | Targeted reads only | Which domains | Doc list from tree or graph |
 | 5 — MCP | `step-5-mcp.md` | No | Figma for frontend? yes/no | Baseline only (filesystem, memory, git, context7) |
 | 6 — Skills | `step-6-skills.md` | Reuse Phase 1 | Staple + codebase-specific list | Staples (§6.2) + one per major framework/runtime found |

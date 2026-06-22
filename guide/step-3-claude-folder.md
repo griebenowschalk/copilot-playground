@@ -50,26 +50,66 @@ Start with one `PostToolUse` lint-after-edit hook. Add `PreToolUse` guards and a
 > **AI-DLC checkpoint — Phase 3**
 > Stop. **If the Phase 0 policy questionnaire already captured hooks and permissions, apply those answers — don't re-ask.** Otherwise ask which hooks to enable (PostToolUse lint, Stop test gate, permission denies). If the human defers, apply minimal PostToolUse lint + standard permission denies; omit Stop unless they opt in.
 
-### Example
+### Permissions: deny in the committed file, allow locally
 
-A practical starter config: deny sensitive reads and destructive shell commands via permissions, auto-fix lint after every edit, and run the test suite before Claude stops.
+The committed `.claude/settings.json` carries **only `deny`** — the guardrails everyone must
+share. The personal `allow` list belongs in **`.claude/settings.local.json`** (gitignored):
+allow-lists are developer- and workflow-specific (one dev relies on the graphify CLI, another
+doesn't), and a committed blanket `Read(*)`/`Edit(*)` would defeat the prompt that catches
+surprising tool calls. Keep the shared file conservative; let each dev widen their own.
 
-**`.claude/settings.json`**
+**`.claude/settings.json`** (committed — deny-only):
 
 ```json
 {
   "permissions": {
-    "allow": ["Bash(npm *)", "Bash(git *)", "Read(*)", "Edit(*)"],
     "deny": ["Bash(rm -rf *)", "Read(./.env)", "Read(./.env.*)"]
-  },
+  }
+}
+```
+
+**`.claude/settings.local.json`** (gitignored — personal allow-list, e.g. tools you trust):
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(graphify query *)",
+      "Bash(command -v graphify)",
+      "mcp__context7__resolve-library-id"
+    ]
+  }
+}
+```
+
+### Example hooks: file-scoped lint, memory loader, optional Stop gate
+
+A practical starter: auto-fix **only the file just edited** (not a whole-project lint pass on
+every keystroke), seed the session with persisted memory, and optionally run tests before
+Claude stops.
+
+**`.claude/settings.json`** `hooks` block:
+
+```json
+{
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/load-memory.sh"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
         "hooks": [
           {
             "type": "command",
-            "command": "npm run lint --silent -- --fix || true"
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/lint-edited-file.sh"
           }
         ]
       }
@@ -89,12 +129,47 @@ A practical starter config: deny sensitive reads and destructive shell commands 
 }
 ```
 
-**`.claude/hooks/check-before-stop.sh`**
+**`.claude/hooks/lint-edited-file.sh`** — parse the edited path from the hook's stdin JSON
+and lint *that file only*, branching by extension. Scope the fixer to the changed file rather
+than running a whole-project `npm run lint` on every edit:
+
+```bash
+#!/usr/bin/env bash
+FILE=$(python3 -c "import json,sys;print(json.load(sys.stdin).get('tool_input',{}).get('file_path',''))" 2>/dev/null || true)
+[ -z "$FILE" ] && exit 0
+cd "${CLAUDE_PROJECT_DIR}"
+case "$FILE" in *.ts|*.js|*.svelte) npx eslint --fix "$FILE" 2>/dev/null || true ;; esac
+case "$FILE" in *.scss|*.svelte) npx stylelint --fix "$FILE" 2>/dev/null || true ;; esac
+```
+
+**`.claude/hooks/load-memory.sh`** *(only if the `memory` MCP server is enabled, Step 5)* —
+read `.claude/memory.jsonl` and inject the stored entities as `additionalContext` so durable
+facts are present from the first turn without Claude having to call a memory tool:
+
+```bash
+#!/usr/bin/env bash
+cd "${CLAUDE_PROJECT_DIR:-.}"
+[ -f .claude/memory.jsonl ] || exit 0
+python3 - <<'PY' 2>/dev/null || true
+import json, os
+lines = [l for l in open('.claude/memory.jsonl') if l.strip()]
+ents = []
+for l in lines:
+    try: d = json.loads(l)
+    except Exception: continue
+    if d.get('type') == 'entity':
+        ents.append(f"{d.get('name')} ({d.get('entityType')}): " + '; '.join(d.get('observations', [])))
+if ents:
+    ctx = "Memory MCP knowledge graph (.claude/memory.jsonl):\n" + "\n".join(ents)
+    print(json.dumps({"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": ctx}}))
+PY
+```
+
+**`.claude/hooks/check-before-stop.sh`** *(opt-in)*:
 
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
-
 cd "${CLAUDE_PROJECT_DIR}"
 npm run typecheck
 npm test
@@ -102,7 +177,9 @@ npm test
 
 Make hook scripts executable (`chmod +x .claude/hooks/*.sh`).
 
-The inline `PostToolUse` command is fine for a single fast fixer. Once you need branching, jq parsing, or file-type checks, move the logic into a script and keep `settings.json` as wiring only.
+You can also inline these as one-liners directly in `settings.json` instead of calling out to
+`.claude/hooks/*.sh` — both work. Extract to scripts (shown here) once the inline shell grows
+past a simple branch, so `settings.json` stays wiring only and the logic is testable.
 
 ---
 
@@ -110,7 +187,18 @@ The inline `PostToolUse` command is fine for a single fast fixer. Once you need 
 
 **Skip this subsection** if Graphify was not enabled in Step 0.5.
 
-Step 0.5 runs `graphify claude install --project`, which adds a **PreToolUse** hook (nudge before Glob/Grep/Read). Step 3.1 adds **PostToolUse** lint and optional **Stop** test gate. These must coexist — **merge, do not overwrite** PreToolUse when writing harness hooks:
+Step 0.5 runs `graphify claude install --project`, which adds a **PreToolUse** nudge toward
+the graph. In practice this is **two matcher groups**, not one:
+
+- **`Read|Glob`** — fires when Claude is about to read a source/doc file, suggesting a
+  `graphify query`/`explain`/`path` instead of reading files one by one.
+- **`Bash`** — fires when a Bash command contains `grep`/`rg`/`find`/`fd`/`ack`/`ag`,
+  suggesting the graph instead of a raw search-and-read storm.
+
+Both are guarded by `command -v graphify` and `[ -f graphify-out/graph.json ]`, so they are
+silent no-ops for devs without the CLI or a local graph. Step 3.1 adds **PostToolUse** lint
+and an optional **Stop** test gate. These must coexist — **merge, do not overwrite**
+PreToolUse when writing harness hooks:
 
 ```json
 {

@@ -185,7 +185,7 @@ After writing the file, run `graphify extract .` and verify output in `graphify-
 ```bash
 graphify extract .
 graphify install --project
-graphify claude install --project    # required — PreToolUse hook nudges graph before Glob/Grep/Read
+graphify claude install --project    # required — PreToolUse hooks nudge graph before file reads (Read|Glob) and shell searches (Bash grep/rg/find/fd)
 graphify vscode install --project
 graphify hook install                # commit-rebuild hook — ONLY if setup root == git root (see below)
 ```

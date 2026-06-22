@@ -26,7 +26,7 @@ mirrored (parallel file), one reused (VS Code Copilot reads Claude's hooks direc
 | Reusable procedures | `.claude/skills/<name>/SKILL.md` | *(same files — Copilot Chat in VS Code reads `.claude/skills/` directly, no `.github/prompts/` duplicates)* |
 | External tools (MCP) | `.mcp.json` (`mcpServers`, `${VAR}`) | `.vscode/mcp.json` (`servers`, `${input:…}`) |
 | Hooks | `.claude/settings.json` (`hooks`) | reads the **same** `.claude/settings.json` hooks *(VS Code Preview; matchers ignored, runs on all tool calls)* — or `.github/hooks/*.json` |
-| Permissions | `.claude/settings.json` (`permissions` allow/deny) | `.vscode/settings.json` (`chat.tools.terminal.autoApprove`, `chat.tools.edits.autoApprove`, `chat.agent.networkFilter`) |
+| Permissions | `.claude/settings.json` (`deny`, committed) + `.claude/settings.local.json` (`allow`, gitignored) | `.vscode/settings.json` (`chat.tools.terminal.autoApprove`, `chat.tools.edits.autoApprove`, `chat.agent.networkFilter`) |
 
 The scoped rule files are **one source of truth**: Copilot loads them automatically by
 `applyTo` glob, Claude loads the same files on demand via its routing table. **Hooks are

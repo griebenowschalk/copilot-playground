@@ -64,30 +64,43 @@ Install gaps:
 | `git` | `mcp-server-git` via `uvx` | No | Local repo history, blame, diffs (read-only) |
 | `context7` | `@upstash/context7-mcp` | No | Version-specific library/framework docs for LLMs |
 
-Use `${CLAUDE_PROJECT_DIR:-.}` for portable paths — [Claude Code MCP docs](https://code.claude.com/docs/en/mcp).
+> **`${CLAUDE_PROJECT_DIR:-.}` is not reliably expanded to an absolute path inside
+> `args`/`env`.** Several servers (filesystem, memory, git) need a real absolute path and
+> break or write to the wrong place when handed the bare `.` fallback or an unexpanded
+> variable. Wrap each path-sensitive server in `sh -c` and resolve the path at launch with
+> `cd "${CLAUDE_PROJECT_DIR:-.}" && pwd`. Servers that take no path (context7) stay as a
+> plain `npx` invocation. Use the wrapper template below, not a bare-substitution one.
 
-### `.mcp.json` template
+### `.mcp.json` template (`sh -c` wrapper pattern)
 
 ```json
 {
   "mcpServers": {
     "filesystem": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "${CLAUDE_PROJECT_DIR:-.}"]
+      "command": "sh",
+      "args": [
+        "-c",
+        "d=\"$(cd \"${CLAUDE_PROJECT_DIR:-.}\" && pwd)\"; exec npx -y @modelcontextprotocol/server-filesystem \"$d/src\" \"$d/docs\""
+      ]
     },
     "memory": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-memory"],
-      "env": {
-        "MEMORY_FILE_PATH": "${CLAUDE_PROJECT_DIR:-.}/.claude/memory.jsonl"
-      }
+      "command": "sh",
+      "args": [
+        "-c",
+        "MEMORY_FILE_PATH=\"$(cd \"${1:-.}\" && pwd)/.claude/memory.jsonl\" exec npx -y @modelcontextprotocol/server-memory",
+        "--",
+        "${CLAUDE_PROJECT_DIR:-.}"
+      ]
     },
     "git": {
       "type": "stdio",
-      "command": "uvx",
-      "args": ["mcp-server-git"]
+      "command": "sh",
+      "args": [
+        "-c",
+        "exec uvx mcp-server-git --repository \"$(cd \"${CLAUDE_PROJECT_DIR:-.}\" && pwd)\""
+      ]
     },
     "context7": {
       "type": "stdio",
@@ -98,6 +111,30 @@ Use `${CLAUDE_PROJECT_DIR:-.}` for portable paths — [Claude Code MCP docs](htt
 }
 ```
 
+Why each wrapper:
+
+| Server | Wrapper does | Why the naive form fails |
+|--------|--------------|--------------------------|
+| `filesystem` | resolves abs path, passes **one or more roots** | bare `.` scopes the server to wherever the launcher's cwd happens to be |
+| `memory` | builds an absolute `MEMORY_FILE_PATH` | a relative path lands the `.jsonl` in the wrong dir, so memory looks "empty" next session |
+| `git` | passes `--repository <abs path>` | `mcp-server-git` resolves the repo from cwd otherwise |
+
+**Scope `filesystem` to the dirs Claude should touch**, not the whole repo root — list each
+root explicitly (e.g. `"$d/src" "$d/docs" "$d/e2e" "$d/scripts" "$d/static"`).
+
+> **This is a security control, not just tidiness.** The `filesystem` MCP server exposes its
+> own file-read tools (`read_text_file`, `get_file_info`, …) that **bypass the
+> `Read(./.env)` permission deny** in `.claude/settings.json` — that deny only governs the
+> **native** Read/Glob/Grep tools, not MCP tool namespaces. Since the server has no per-file
+> exclusion, scoping it to subdirs is the *only* thing keeping root-level secrets (`.env`,
+> `.git`) out of its reach: `.env` lives at the repo root, so it sits outside every allowed
+> directory. The `sh -c` wrapper matters here too — if the path token doesn't expand, the
+> server falls back to its cwd (**the repo root**), silently re-exposing everything. **Do not
+> point the wrapper at the repo root or revert to bare `${CLAUDE_PROJECT_DIR}/src` args.** To
+> grant a new area, add that specific subdirectory to the path list. Verify after restart by
+> asking the model to "list the directories you have access to" — it should show the
+> subdirs, not the root.
+
 **Commit** `.mcp.json` — no secrets, only env placeholders. Context7 needs no API key.
 
 ---
@@ -106,23 +143,33 @@ Use `${CLAUDE_PROJECT_DIR:-.}` for portable paths — [Claude Code MCP docs](htt
 
 If the project has a UI layer and uses Figma for design handoff, add the `figma` server. Skip for backend-only or CLI repos.
 
-Append to `mcpServers`:
+Append to `mcpServers`. Use the same `sh -c` wrapper to **source `.env` directly** so the
+key loads without a manual `export` every session:
 
 ```json
 "figma": {
   "type": "stdio",
-  "command": "npx",
-  "args": ["-y", "figma-developer-mcp", "--stdio"],
-  "env": { "FIGMA_API_KEY": "${FIGMA_API_KEY}" }
+  "command": "sh",
+  "args": [
+    "-c",
+    "set -a; [ -f \"${1:-.}/.env\" ] && . \"${1:-.}/.env\"; set +a; exec npx -y figma-developer-mcp --stdio",
+    "--",
+    "${CLAUDE_PROJECT_DIR:-.}"
+  ]
 }
 ```
 
+> **Don't rely on shell-exported env for `${FIGMA_API_KEY}`.** An `"env": { "FIGMA_API_KEY":
+> "${FIGMA_API_KEY}" }` block only works if the developer remembers to `export` the key (or
+> run `direnv`) **before** launching Claude — a reliable source of "figma MCP failed to
+> connect" friction. The wrapper above sources the gitignored `.env` at launch
+> (`set -a; . .env; set +a`), so the only setup step is "create `.env` with
+> `FIGMA_API_KEY=…`". The `[ -f … ]` guard makes it a no-op when there is no `.env`.
+
 **`.env` setup** *(Figma only)*: document this in `.claude/skills/figma-to-code/README.md`
 (created alongside the skill in Step 6 §6.7) rather than generating an `.env.example` —
-cover creating a gitignored `.env` with `FIGMA_API_KEY`, and exporting it before starting
-Claude (`${FIGMA_API_KEY}` in `.mcp.json` is expanded from the **shell environment**, not
-read from `.env` automatically — `export $(grep -v '^#' .env | xargs)` or
-[direnv](https://direnv.net/)).
+cover creating a gitignored `.env` with `FIGMA_API_KEY=…`. No export/`direnv` step is needed
+now that the server sources `.env` itself.
 
 Step 3 already keeps keys out of the model context on both tools: Claude denies
 `Read(./.env)` via `permissions`, and the Copilot side combines the shared
