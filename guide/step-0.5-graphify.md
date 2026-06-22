@@ -281,7 +281,83 @@ The guard makes it a **no-op** for devs without graphify or a local graph (keeps
 
 ### Per-clone hook setup *(teams)*
 
-`.git/hooks/` is **not versioned**, so teammates who clone don't get the commit/checkout hooks automatically. Provide a **one-time** setup script (CLI install if missing → `graphify hook install` → point at the initial `graphify extract .`) wired to a package command, e.g. `npm run graphify:setup`. Do **not** put `graphify hook install` in a per-run `predev`/dev-start step — re-running it on every dev start reads as a reinstall; the dev-server watcher above is what keeps the graph fresh day to day.
+`.git/hooks/` is **not versioned**, so teammates who clone don't get the commit/checkout hooks automatically. Provide a **one-time** setup script wired to a package command, e.g. `npm run graphify:setup`. Do **not** put `graphify hook install` in a per-run `predev`/dev-start step — re-running it on every dev start reads as a reinstall; the dev-server watcher above is what keeps the graph fresh day to day.
+
+A robust version of that script does four things: **install the CLI if missing, or upgrade it if already present** (so re-running setup is cheap and idempotent, not a from-scratch reinstall); **record the installed version** to `.claude/skills/graphify/.graphify_version` so the repo tracks which version each dev's local graph was built with; run `graphify hook install`; and point at the initial `graphify extract .` only when no graph exists yet. Drop it in at `scripts/graphify-setup.sh`:
+
+```bash
+#!/usr/bin/env bash
+# One-time local setup for graphify (codebase knowledge graph).
+#
+# - graphify-out/ is gitignored: every dev builds and updates their own graph
+#   locally, nothing is shared via the repo.
+# - .git/hooks are not versioned, so `graphify hook install` must run per
+#   clone. This script is the one-time installer — run it once after cloning.
+#   Day-to-day the graph updates automatically (the dev-server watcher above,
+#   plus the post-commit / post-checkout hooks installed here).
+set -e
+
+VERSION_FILE=".claude/skills/graphify/.graphify_version"
+
+if ! command -v graphify >/dev/null 2>&1; then
+  echo "[graphify] CLI not found, installing..."
+  if command -v uv >/dev/null 2>&1; then
+    uv tool install graphifyy
+  elif command -v pipx >/dev/null 2>&1; then
+    pipx install graphifyy
+  else
+    echo "[graphify] Neither uv nor pipx found. Install one (e.g. brew install uv) and re-run."
+    exit 1
+  fi
+else
+  # Already installed — upgrade to latest rather than reinstalling from scratch.
+  echo "[graphify] CLI found, checking for updates..."
+  if command -v uv >/dev/null 2>&1; then
+    uv tool upgrade graphifyy || echo "[graphify] Upgrade skipped (up to date or offline)."
+  elif command -v pipx >/dev/null 2>&1; then
+    pipx upgrade graphifyy || echo "[graphify] Upgrade skipped (up to date or offline)."
+  fi
+fi
+
+# Record the installed version so the repo tracks what each dev is running.
+INSTALLED_VERSION="$(graphify --version 2>/dev/null | awk '{print $NF}')"
+[ -n "$INSTALLED_VERSION" ] && echo "$INSTALLED_VERSION" > "$VERSION_FILE"
+
+graphify hook install
+
+if [ ! -f graphify-out/graph.json ]; then
+  echo "[graphify] No local graph yet. Build one with: graphify extract ."
+else
+  echo "[graphify] Local graph found. Hooks will keep it updated on commit/checkout."
+fi
+```
+
+Then wire it up in `package.json`: `"graphify:setup": "bash scripts/graphify-setup.sh"`.
+
+> **Subdir/monorepo caveat carries over.** The script calls `graphify hook install`, which is git-repo-scoped (see 0.5.2). Only ship this script — and the `npm run graphify:setup` entry — when the project root **is** the git root. For a subdirectory/monorepo-package setup, drop the `graphify hook install` line and have the script point at `graphify update .` instead.
+
+### Root README section *(teams)*
+
+Add a short **opt-in** section to the target repo's **root `README.md`** so devs know the graph exists, that it's fully local, and how to turn it on for themselves. Keep it brief — the full workflow lives in the skill. Example:
+
+```markdown
+## Codebase graph (Graphify — optional)
+
+Graphify builds a local knowledge graph of the codebase that Claude/Copilot use
+for architecture and "who calls what" questions. It's **opt-in and fully local** —
+the graph (`graphify-out/`) is gitignored and never shared. To enable it:
+
+​```bash
+npm run graphify:setup    # installs/upgrades the CLI + git hooks, then prompts you to build
+graphify extract .        # initial build (uses your Anthropic API key, can take a while)
+​```
+
+After that the graph updates automatically (on save during `npm run dev`, and on
+commit/checkout). If you don't run this, nothing graphify-related runs for you.
+Full workflow and query commands: `.claude/skills/graphify/SKILL.md`.
+```
+
+This complements the harness-facing files (skill, hook, `CLAUDE.md` row) with a **human-facing** entry point — teammates discover Graphify from the README they already read, not from `.claude/` internals.
 
 ---
 

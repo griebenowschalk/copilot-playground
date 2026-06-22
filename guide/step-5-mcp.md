@@ -143,8 +143,8 @@ root explicitly (e.g. `"$d/src" "$d/docs" "$d/e2e" "$d/scripts" "$d/static"`).
 
 If the project has a UI layer and uses Figma for design handoff, add the `figma` server. Skip for backend-only or CLI repos.
 
-Append to `mcpServers`. Use the same `sh -c` wrapper to **source `.env` directly** so the
-key loads without a manual `export` every session:
+Append to `mcpServers`. Use a `sh -c` wrapper that reads **only `FIGMA_API_KEY`** from `.env`
+so the key loads without a manual `export` every session:
 
 ```json
 "figma": {
@@ -152,7 +152,7 @@ key loads without a manual `export` every session:
   "command": "sh",
   "args": [
     "-c",
-    "set -a; [ -f \"${1:-.}/.env\" ] && . \"${1:-.}/.env\"; set +a; exec npx -y figma-developer-mcp --stdio",
+    "f=\"${1:-.}/.env\"; [ -f \"$f\" ] && export FIGMA_API_KEY=\"$(sed -n 's/^FIGMA_API_KEY=//p' \"$f\" | tail -1)\"; exec npx -y figma-developer-mcp --stdio",
     "--",
     "${CLAUDE_PROJECT_DIR:-.}"
   ]
@@ -162,14 +162,25 @@ key loads without a manual `export` every session:
 > **Don't rely on shell-exported env for `${FIGMA_API_KEY}`.** An `"env": { "FIGMA_API_KEY":
 > "${FIGMA_API_KEY}" }` block only works if the developer remembers to `export` the key (or
 > run `direnv`) **before** launching Claude — a reliable source of "figma MCP failed to
-> connect" friction. The wrapper above sources the gitignored `.env` at launch
-> (`set -a; . .env; set +a`), so the only setup step is "create `.env` with
-> `FIGMA_API_KEY=…`". The `[ -f … ]` guard makes it a no-op when there is no `.env`.
+> connect" friction. The wrapper above reads the gitignored `.env` at launch, so the only
+> setup step is "create `.env` with `FIGMA_API_KEY=…`". The `[ -f … ]` guard makes it a no-op
+> when there is no `.env`.
+
+> **Least privilege — extract the one key, don't source the whole `.env`.** A tempting shortcut
+> is `set -a; . "$f"; set +a` (source the file, auto-export everything). **Avoid it for any
+> `.env`-backed MCP server.** Sourcing exports *every* secret in `.env` — DB passwords, payment
+> keys, AWS creds — into a third-party package pulled unpinned via `npx -y`, and `. .env`
+> *executes* the file (a crafted `KEY=$(...)` line would run at launch). The `sed -n` form above
+> reads `FIGMA_API_KEY` as **data** and exports **only** that one variable. Trade-off: it assumes
+> a plain `FIGMA_API_KEY=token` line (no quote-stripping/multi-line); for a quoted secret, strip
+> the quotes in `.env` or whitelist with `env -i PATH="$PATH" HOME="$HOME" NEEDED_VAR="$NEEDED_VAR" …`
+> rather than reverting to a full source. Apply the same one-variable pattern to any future
+> `.env`-backed server.
 
 **`.env` setup** *(Figma only)*: document this in `.claude/skills/figma-to-code/README.md`
 (created alongside the skill in Step 6 §6.7) rather than generating an `.env.example` —
 cover creating a gitignored `.env` with `FIGMA_API_KEY=…`. No export/`direnv` step is needed
-now that the server sources `.env` itself.
+now that the server reads `.env` itself.
 
 Step 3 already keeps keys out of the model context on both tools: Claude denies
 `Read(./.env)` via `permissions`, and the Copilot side combines the shared

@@ -77,6 +77,54 @@ smart_remove() {
   fi
 }
 
+# strip_readme_graphify <readme>
+#   Removes the "## Codebase graph (Graphify — optional)" section (heading through
+#   the line before the next ## / # heading, or EOF) from an app-owned README.
+#   The file is edited in place — never deleted or reverted wholesale.
+strip_readme_graphify() {
+  local f="$1"
+  [[ -f "$f" ]] || return 0
+  grep -qE '^## Codebase graph \(Graphify' "$f" || return 0
+  if [[ $DRY_RUN == 1 ]]; then
+    echo "would edit     $f  (remove Graphify section)"
+    return 0
+  fi
+  local tmp; tmp="$(mktemp)"
+  awk '
+    /^## Codebase graph \(Graphify/ { skip=1; next }
+    skip && /^#{1,2} /            { skip=0 }
+    !skip                         { print }
+  ' "$f" > "$tmp" && mv "$tmp" "$f"
+  echo "edited    $f  (removed Graphify section)"
+}
+
+# strip_pkg_script <script-name>
+#   Removes a single entry from package.json "scripts". package.json is app-owned,
+#   so it is edited in place (not deleted/reverted). Uses node for correct JSON
+#   handling — warns to remove manually if node is unavailable.
+strip_pkg_script() {
+  local name="$1" f="package.json"
+  [[ -f "$f" ]] || return 0
+  grep -q "\"$name\"" "$f" || return 0
+  if [[ $DRY_RUN == 1 ]]; then
+    echo "would edit     $f  (remove scripts.$name)"
+    return 0
+  fi
+  if command -v node >/dev/null 2>&1; then
+    node -e '
+      const fs=require("fs"), p="package.json", n=process.argv[1];
+      const j=JSON.parse(fs.readFileSync(p,"utf8"));
+      if (j.scripts && n in j.scripts) {
+        delete j.scripts[n];
+        fs.writeFileSync(p, JSON.stringify(j, null, 2) + "\n");
+      }
+    ' "$name"
+    echo "edited    $f  (removed scripts.$name)"
+  else
+    echo "WARNING: node not found — remove the \"$name\" entry from $f manually."
+  fi
+}
+
 # Root — entry files (Steps 1–2)
 smart_remove AGENTS.md
 smart_remove CLAUDE.md
@@ -106,6 +154,15 @@ smart_remove docs
 smart_remove graphify-out
 smart_remove .graphifyignore
 smart_remove .copilotignore
+
+# Graphify — per-clone setup script (Step 0.5 §0.5.4). Single new file added by
+# the harness; scripts/ itself is app code and is left alone.
+smart_remove scripts/graphify-setup.sh
+
+# Graphify — partial edits to app-owned files. README.md and package.json are NOT
+# harness-owned, so the harness additions are stripped in place, not removed.
+strip_readme_graphify README.md
+strip_pkg_script graphify:setup
 
 # Per-run ledger — gitignored under guide/ inside the target
 smart_remove guide/.harness-progress.md
