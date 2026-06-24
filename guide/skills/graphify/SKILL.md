@@ -68,4 +68,18 @@ graphify explain "SymbolName"
 ```
 
 **Phrase around concrete symbols that exist as graph nodes** (a route handler, function, or class name from `GRAPH_REPORT.md`), not abstract architecture terms (`"layer dependencies"`, `"architecture boundaries"`). Matching is keyword/BFS-based, not semantic — abstract phrasings often return "No matching nodes" or hit unrelated config strings (e.g. `"dependencies"` matching `package.json`), wasting a round-trip. If a query misses, look up a real symbol name and reformulate around it rather than retrying synonyms.
-</content>
+
+## Reference docs (`references/`)
+
+Deeper, load-on-demand docs for specific graphify operations (installed alongside this skill). Read the relevant one **only** when its task comes up — they are not loaded by default:
+
+| File | Read when… |
+|------|------------|
+| `references/query.md` | Running `query` / `path` / `explain` — the full traversal flow |
+| `references/update.md` | Incremental `--update` or `--cluster-only` rebuilds |
+| `references/hooks.md` | Installing the post-commit hook or wiring graphify into `CLAUDE.md` |
+| `references/add-watch.md` | `add <url>` or `--watch` a folder |
+| `references/exports.md` | Export flags (`--wiki`, `--neo4j`, `--svg`, `--graphml`, `--mcp`, …) or the token-reduction benchmark |
+| `references/extraction-spec.md` | Semantic extraction of doc / paper / image inputs |
+| `references/github-and-merge.md` | Cloning GitHub URLs or merging multiple repos/folders into one graph |
+| `references/transcribe.md` | Transcribing video / audio inputs |

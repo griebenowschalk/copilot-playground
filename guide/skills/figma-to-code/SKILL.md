@@ -11,7 +11,7 @@ when_to_use: >-
   "the design changed — update <Component>", design-handoff or pixel-parity work.
 allowed-tools: Read, Grep, Glob
 ---
-<!-- Task skill — auto-routes on Figma/design-to-code requests. Pairs with the figma MCP server (Step 5) and the figma.prompt.md Copilot counterpart (Step 6 §6.7). For very large frames, set `context: fork` + `agent` in the frontmatter so the heavy MCP payload stays out of the main window. -->
+<!-- Task skill — auto-routes on Figma/design-to-code requests. Pairs with the figma MCP server; visible to Copilot Chat directly (no separate prompt file). For very large frames, set `context: fork` + `agent` in the frontmatter so the heavy MCP payload stays out of the main window. -->
 
 ## Gate
 
@@ -45,7 +45,7 @@ is unset), stop and say so — do not guess pixel values from a screenshot. Othe
 - **Reuse first.** A new component is the exception, justified in the mapping — not the default.
 - **Tokens over literals.** Map Figma styles to existing theme tokens / utility classes.
 - **Stay version-aware.** For framework/styling specifics, reach for `docs-explorer` /
-  context7 rather than guessing (Step 3 §3.3 / Step 5).
+  context7 rather than guessing.
 - **Read narrowly.** Never pull an entire Figma file when one node will do.
 
 ## Output

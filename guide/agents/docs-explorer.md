@@ -18,16 +18,16 @@ When given one or more technologies/libraries to look up:
 
 ## Lookup Strategy
 
-### Step 1: Context7 MCP (Primary)
+### Primary: Context7 MCP
 
 For each library, call these in sequence:
 
 1. `mcp__context7__resolve-library-id` with the library name to get the Context7 ID
 2. `mcp__context7__query-docs` with the resolved ID and specific query
 
-Run Step 1 for ALL libraries in parallel.
+Run the Context7 lookups for ALL libraries in parallel.
 
-### Step 2: Web Fallback (If Context7 fails or lacks info)
+### Fallback: Web search (if Context7 fails or lacks info)
 
 If Context7 doesn't have the library or lacks specific info:
 

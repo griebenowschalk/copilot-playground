@@ -1,6 +1,6 @@
 ---
 description: Documentation lookup specialist. Use when you need current docs for any library, framework, or technology — fetches version-specific docs instead of guessing from training data.
-tools: ['codebase', 'search', 'fetch', 'github']
+tools: ['search/codebase', 'search', 'web/fetch']
 model: GPT-4.1
 ---
 

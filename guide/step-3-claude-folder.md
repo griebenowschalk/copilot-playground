@@ -177,9 +177,15 @@ npm test
 
 Make hook scripts executable (`chmod +x .claude/hooks/*.sh`).
 
-You can also inline these as one-liners directly in `settings.json` instead of calling out to
-`.claude/hooks/*.sh` — both work. Extract to scripts (shown here) once the inline shell grows
-past a simple branch, so `settings.json` stays wiring only and the logic is testable.
+**Keep all hook logic in `.claude/hooks/*.sh`** referenced via `${CLAUDE_PROJECT_DIR}` —
+`settings.json` should hold only wiring (the matcher + the script path), never inline shell.
+This keeps hooks testable and reviewable, makes a future change a one-file edit to a script
+(not a JSON-escaping exercise), and is the standard this harness follows. If a tool installs
+a hook as an inline one-liner (e.g. Graphify, see §3.2), **extract it into a script** under
+`.claude/hooks/` and point `settings.json` at that file.
+
+Do **not** embed setup-guide step/phase/§ numbers in hook scripts or their comments — those
+references mean nothing in the target repo. Describe what the hook does directly.
 
 ---
 
@@ -216,6 +222,16 @@ PreToolUse when writing harness hooks:
 ```
 
 **Order:** Graphify install in Phase 0.5 first; write harness hooks in Phase 3 after, preserving PreToolUse.
+
+**Extract Graphify's inline hooks to scripts.** `graphify claude install` writes its two
+PreToolUse nudges as inline one-liner commands in `.claude/settings.json`. Per §3.1, move
+each into its own script — e.g. `.claude/hooks/graphify-bash-nudge.sh` (the `Bash` matcher)
+and `.claude/hooks/graphify-read-nudge.sh` (the `Read|Glob` matcher) — and replace the inline
+`command` with `${CLAUDE_PROJECT_DIR}/.claude/hooks/<name>.sh`. Each script should `cd
+"${CLAUDE_PROJECT_DIR:-.}"`, keep the same guards (`command -v graphify`, `[ -f
+graphify-out/graph.json ]`) so it stays a silent no-op without a local graph, and `exit 0`.
+`chmod +x` the scripts. Result: `settings.json` is pure wiring and all hook logic lives in
+`.claude/hooks/`.
 
 Because VS Code Copilot reads the same `.claude/settings.json` `hooks` block (§3.4), it
 picks up this merged PreToolUse hook too — though it **ignores the matcher** and runs the
